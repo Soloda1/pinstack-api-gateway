@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -15,8 +16,10 @@ type Config struct {
 }
 
 type HTTPServer struct {
-	Address string
-	Port    int
+	Port        int    `mapstructure:"port"`
+	Address     string `mapstructure:"address"`
+	Timeout     int    `mapstructure:"timeout"`
+	IdleTimeout int    `mapstructure:"idle_timeout"`
 }
 
 type Services struct {
@@ -41,14 +44,21 @@ type JWT struct {
 }
 
 func MustLoad() *Config {
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "config"
+	}
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./config")
+	viper.AddConfigPath(configPath)
 
 	viper.SetDefault("env", "dev")
 
 	viper.SetDefault("http_server.address", "0.0.0.0")
 	viper.SetDefault("http_server.port", 8080)
+	viper.SetDefault("http_server.timeout", 60)
+	viper.SetDefault("http_server.idle_timeout", 120)
 
 	viper.SetDefault("services.user.address", "user-service")
 	viper.SetDefault("services.user.port", 50051)
@@ -65,28 +75,10 @@ func MustLoad() *Config {
 		os.Exit(1)
 	}
 
-	config := &Config{
-		Env: viper.GetString("env"),
-		HTTPServer: HTTPServer{
-			Address: viper.GetString("http_server.address"),
-			Port:    viper.GetInt("http_server.port"),
-		},
-		Services: Services{
-			User: UserService{
-				Address: viper.GetString("services.user.address"),
-				Port:    viper.GetInt("services.user.port"),
-			},
-			Auth: AuthService{
-				Address: viper.GetString("services.auth.address"),
-				Port:    viper.GetInt("services.auth.port"),
-			},
-		},
-		JWT: JWT{
-			Secret:           viper.GetString("jwt.secret"),
-			AccessExpiresAt:  viper.GetString("jwt.access_expires_at"),
-			RefreshExpiresAt: viper.GetString("jwt.refresh_expires_at"),
-		},
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		panic(fmt.Errorf("error unmarshaling config: %w", err))
 	}
 
-	return config
+	return &cfg
 }
