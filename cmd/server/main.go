@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"pinstack-api-gateway/config"
-	"pinstack-api-gateway/internal/handlers/user"
+	user_handler "pinstack-api-gateway/internal/handlers/user"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/middlewares"
 
@@ -25,21 +25,21 @@ import (
 
 func main() {
 	cfg := config.MustLoad()
-
 	log := logger.New(cfg.Env)
+
 	log.Info("Starting API Gateway")
 
 	userConn, err := grpc.NewClient(
-		cfg.Services.User.Address,
+		fmt.Sprintf("%s:%d", cfg.Services.User.Address, cfg.Services.User.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		log.Error("Failed to connect to User Service", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	defer userConn.Close()
 
 	userClient := user_client.NewUserClient(userConn, log)
-
 	userHandler := user_handler.NewUserHandler(userClient, log)
 
 	r := chi.NewRouter()
@@ -66,7 +66,10 @@ func main() {
 	done := make(chan bool, 1)
 
 	go func() {
-		log.Info("Starting HTTP server", "port", cfg.HTTPServer.Port)
+		log.Info("Starting HTTP server",
+			slog.String("address", cfg.HTTPServer.Address),
+			slog.Int("port", cfg.HTTPServer.Port),
+		)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("Server error", slog.String("error", err.Error()))
 		}
@@ -81,11 +84,6 @@ func main() {
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Error("Server shutdown error", slog.String("error", err.Error()))
-	}
-
-	err = userConn.Close()
-	if err != nil {
-		log.Error("Failed to close User Service", slog.String("error", err.Error()))
 	}
 
 	<-done

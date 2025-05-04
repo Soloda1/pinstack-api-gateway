@@ -9,10 +9,10 @@ import (
 )
 
 type Config struct {
-	Env        string
-	HTTPServer HTTPServer
-	Services   Services
-	JWT        JWT
+	Env        string     `mapstructure:"env"`
+	HTTPServer HTTPServer `mapstructure:"http_server"`
+	Services   Services   `mapstructure:"services"`
+	JWT        JWT        `mapstructure:"jwt"`
 }
 
 type HTTPServer struct {
@@ -23,35 +23,30 @@ type HTTPServer struct {
 }
 
 type Services struct {
-	User UserService
-	Auth AuthService
+	User UserService `mapstructure:"user"`
+	Auth AuthService `mapstructure:"auth"`
 }
 
 type UserService struct {
-	Address string
-	Port    int
+	Address string `mapstructure:"address"`
+	Port    int    `mapstructure:"port"`
 }
 
 type AuthService struct {
-	Address string
-	Port    int
+	Address string `mapstructure:"address"`
+	Port    int    `mapstructure:"port"`
 }
 
 type JWT struct {
-	Secret           string
-	AccessExpiresAt  string
-	RefreshExpiresAt string
+	Secret           string `mapstructure:"secret"`
+	AccessExpiresAt  string `mapstructure:"access_expires_at"`
+	RefreshExpiresAt string `mapstructure:"refresh_expires_at"`
 }
 
 func MustLoad() *Config {
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "config"
-	}
-
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(configPath)
+	viper.AddConfigPath("./config")
 
 	viper.SetDefault("env", "dev")
 
