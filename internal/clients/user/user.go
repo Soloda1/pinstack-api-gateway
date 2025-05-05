@@ -2,11 +2,14 @@ package user_client
 
 import (
 	"context"
+	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
 
 	pb "github.com/soloda1/pinstack-proto-definitions/gen/go/pinstack-proto-definitions/user/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type userClient struct {
@@ -26,7 +29,12 @@ func (c *userClient) GetUser(ctx context.Context, id int64) (*models.User, error
 	resp, err := c.client.GetUser(ctx, &pb.GetUserRequest{Id: id})
 	if err != nil {
 		c.log.Error("Failed to get user", "id", id, "error", err)
-		return nil, err
+		if st, ok := status.FromError(err); ok {
+			if st.Code() == codes.NotFound {
+				return nil, custom_errors.ErrUserNotFound
+			}
+		}
+		return nil, custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully got user", "id", id)
 	return models.UserFromProto(resp), nil
@@ -41,7 +49,27 @@ func (c *userClient) CreateUser(ctx context.Context, user *models.User) (*models
 	})
 	if err != nil {
 		c.log.Error("Failed to create user", "username", user.Username, "error", err)
-		return nil, err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.AlreadyExists:
+				switch st.Message() {
+				case "username already exists":
+					return nil, custom_errors.ErrUsernameExists
+				case "email already exists":
+					return nil, custom_errors.ErrEmailExists
+				}
+			case codes.InvalidArgument:
+				switch st.Message() {
+				case "invalid username":
+					return nil, custom_errors.ErrInvalidUsername
+				case "invalid email":
+					return nil, custom_errors.ErrInvalidEmail
+				case "invalid password":
+					return nil, custom_errors.ErrInvalidPassword
+				}
+			}
+		}
+		return nil, custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully created user", "id", resp.Id)
 	return models.UserFromProto(resp), nil
@@ -58,7 +86,29 @@ func (c *userClient) UpdateUser(ctx context.Context, user *models.User) (*models
 	})
 	if err != nil {
 		c.log.Error("Failed to update user", "id", user.ID, "error", err)
-		return nil, err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return nil, custom_errors.ErrUserNotFound
+			case codes.AlreadyExists:
+				switch st.Message() {
+				case "username already exists":
+					return nil, custom_errors.ErrUsernameExists
+				case "email already exists":
+					return nil, custom_errors.ErrEmailExists
+				}
+			case codes.InvalidArgument:
+				switch st.Message() {
+				case "invalid username":
+					return nil, custom_errors.ErrInvalidUsername
+				case "invalid email":
+					return nil, custom_errors.ErrInvalidEmail
+				}
+			case codes.PermissionDenied:
+				return nil, custom_errors.ErrOperationNotAllowed
+			}
+		}
+		return nil, custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully updated user", "id", user.ID)
 	return models.UserFromProto(resp), nil
@@ -69,7 +119,15 @@ func (c *userClient) DeleteUser(ctx context.Context, id int64) error {
 	_, err := c.client.DeleteUser(ctx, &pb.DeleteUserRequest{Id: id})
 	if err != nil {
 		c.log.Error("Failed to delete user", "id", id, "error", err)
-		return err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
+			case codes.PermissionDenied:
+				return custom_errors.ErrOperationNotAllowed
+			}
+		}
+		return custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully deleted user", "id", id)
 	return nil
@@ -80,7 +138,12 @@ func (c *userClient) GetUserByUsername(ctx context.Context, username string) (*m
 	resp, err := c.client.GetUserByUsername(ctx, &pb.GetUserByUsernameRequest{Username: username})
 	if err != nil {
 		c.log.Error("Failed to get user by username", "username", username, "error", err)
-		return nil, err
+		if st, ok := status.FromError(err); ok {
+			if st.Code() == codes.NotFound {
+				return nil, custom_errors.ErrUserNotFound
+			}
+		}
+		return nil, custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully got user by username", "username", username)
 	return models.UserFromProto(resp), nil
@@ -91,7 +154,12 @@ func (c *userClient) GetUserByEmail(ctx context.Context, email string) (*models.
 	resp, err := c.client.GetUserByEmail(ctx, &pb.GetUserByEmailRequest{Email: email})
 	if err != nil {
 		c.log.Error("Failed to get user by email", "email", email, "error", err)
-		return nil, err
+		if st, ok := status.FromError(err); ok {
+			if st.Code() == codes.NotFound {
+				return nil, custom_errors.ErrUserNotFound
+			}
+		}
+		return nil, custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully got user by email", "email", email)
 	return models.UserFromProto(resp), nil
@@ -106,7 +174,12 @@ func (c *userClient) SearchUsers(ctx context.Context, query string, page, limit 
 	})
 	if err != nil {
 		c.log.Error("Failed to search users", "query", query, "error", err)
-		return nil, 0, err
+		if st, ok := status.FromError(err); ok {
+			if st.Code() == codes.InvalidArgument {
+				return nil, 0, custom_errors.ErrInvalidSearchQuery
+			}
+		}
+		return nil, 0, custom_errors.ErrExternalServiceError
 	}
 
 	users := make([]*models.User, 0, len(resp.Users))
@@ -125,7 +198,19 @@ func (c *userClient) UpdatePassword(ctx context.Context, id int64, password stri
 	})
 	if err != nil {
 		c.log.Error("Failed to update user password", "id", id, "error", err)
-		return err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
+			case codes.InvalidArgument:
+				if st.Message() == "invalid password" {
+					return custom_errors.ErrInvalidPassword
+				}
+			case codes.PermissionDenied:
+				return custom_errors.ErrOperationNotAllowed
+			}
+		}
+		return custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully updated user password", "id", id)
 	return nil
@@ -139,7 +224,19 @@ func (c *userClient) UpdateAvatar(ctx context.Context, id int64, avatarURL strin
 	})
 	if err != nil {
 		c.log.Error("Failed to update user avatar", "id", id, "error", err)
-		return err
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
+			case codes.InvalidArgument:
+				if st.Message() == "invalid avatar format" {
+					return custom_errors.ErrInvalidAvatarFormat
+				}
+			case codes.PermissionDenied:
+				return custom_errors.ErrOperationNotAllowed
+			}
+		}
+		return custom_errors.ErrExternalServiceError
 	}
 	c.log.Info("Successfully updated user avatar", "id", id)
 	return nil
