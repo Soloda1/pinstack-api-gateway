@@ -9,10 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type GetUserRequest struct {
-	ID int64 `json:"id" validate:"required"`
-}
-
 type GetUserResponse struct {
 	ID        int64   `json:"id"`
 	Username  string  `json:"username"`
