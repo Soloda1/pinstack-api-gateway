@@ -190,32 +190,6 @@ func (c *userClient) SearchUsers(ctx context.Context, query string, page, limit 
 	return users, resp.Total, nil
 }
 
-func (c *userClient) UpdatePassword(ctx context.Context, id int64, password string) error {
-	c.log.Info("Updating user password", "id", id)
-	_, err := c.client.UpdatePassword(ctx, &pb.UpdatePasswordRequest{
-		Id:       id,
-		Password: password,
-	})
-	if err != nil {
-		c.log.Error("Failed to update user password", "id", id, "error", err)
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.NotFound:
-				return custom_errors.ErrUserNotFound
-			case codes.InvalidArgument:
-				if st.Message() == "invalid password" {
-					return custom_errors.ErrInvalidPassword
-				}
-			case codes.PermissionDenied:
-				return custom_errors.ErrOperationNotAllowed
-			}
-		}
-		return custom_errors.ErrExternalServiceError
-	}
-	c.log.Info("Successfully updated user password", "id", id)
-	return nil
-}
-
 func (c *userClient) UpdateAvatar(ctx context.Context, id int64, avatarURL string) error {
 	c.log.Info("Updating user avatar", "id", id)
 	_, err := c.client.UpdateAvatar(ctx, &pb.UpdateAvatarRequest{

@@ -13,6 +13,5 @@ type UserClient interface {
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	SearchUsers(ctx context.Context, query string, page, limit int) ([]*models.User, int64, error)
-	UpdatePassword(ctx context.Context, id int64, password string) error
 	UpdateAvatar(ctx context.Context, id int64, avatarURL string) error
 }
