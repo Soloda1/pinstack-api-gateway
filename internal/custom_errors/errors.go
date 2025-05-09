@@ -14,6 +14,16 @@ var (
 	ErrUserAlreadyExists = errors.New("user already exists")
 )
 
+// Ошибки аутентификации
+var (
+	ErrInvalidCredentials    = errors.New("invalid credentials")
+	ErrInvalidRefreshToken   = errors.New("invalid refresh token")
+	ErrUnauthenticated       = errors.New("unauthenticated")
+	ErrTokenExpired          = errors.New("token expired")
+	ErrInvalidToken          = errors.New("invalid token")
+	ErrTokenGenerationFailed = errors.New("token generation failed")
+)
+
 // Ошибки валидации
 var (
 	ErrValidationFailed = errors.New("validation failed")
