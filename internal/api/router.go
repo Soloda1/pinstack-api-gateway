@@ -34,23 +34,29 @@ func (r *Router) Setup(cfg *config.Config) {
 	r.router.Use(middlewares.RequestLoggerMiddleware(r.log))
 	r.router.Use(middleware.Timeout(time.Duration(cfg.HTTPServer.Timeout) * time.Second))
 
+	jwtMiddleware := middlewares.JWTValidationMiddleware(cfg.JWT.Secret, r.log)
+
 	r.router.Route("/api/v1", func(v1 chi.Router) {
-		v1.Mount("/users", r.setupUserRoutes())
+		v1.Mount("/users", r.setupUserRoutes(jwtMiddleware))
 	})
 }
 
-func (r *Router) setupUserRoutes() http.Handler {
+func (r *Router) setupUserRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
 	userHandler := user_handler.NewUserHandler(r.userClient, r.log)
 	router := chi.NewRouter()
 
 	router.Get("/{id}", userHandler.GetUser)
-	router.Post("/", userHandler.CreateUser)
-	router.Put("/{id}", userHandler.UpdateUser)
-	router.Delete("/{id}", userHandler.DeleteUser)
 	router.Get("/username/{username}", userHandler.GetUserByUsername)
 	router.Get("/email/{email}", userHandler.GetUserByEmail)
 	router.Get("/search", userHandler.SearchUsers)
-	router.Put("/{id}/avatar", userHandler.UpdateAvatar)
+
+	router.Group(func(r chi.Router) {
+		r.Use(jwtMiddleware)
+		r.Post("/", userHandler.CreateUser)
+		r.Put("/{id}", userHandler.UpdateUser)
+		r.Delete("/{id}", userHandler.DeleteUser)
+		r.Put("/{id}/avatar", userHandler.UpdateAvatar)
+	})
 
 	return router
 }

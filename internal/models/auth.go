@@ -20,7 +20,7 @@ type LoginRequest struct {
 }
 
 type UpdatePasswordRequest struct {
-	ID          int64  `json:"id" validate:"required"`
+	ID          int64  `json:"-"`
 	OldPassword string `json:"old_password" validate:"required,min=6"`
 	NewPassword string `json:"new_password" validate:"required,min=6"`
 }
