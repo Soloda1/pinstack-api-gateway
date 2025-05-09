@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	auth_client "pinstack-api-gateway/internal/clients/auth"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"syscall"
 	"time"
@@ -34,12 +35,24 @@ func main() {
 	}
 	defer userConn.Close()
 
+	authConn, err := grpc.NewClient(
+		fmt.Sprintf("%s:%d", cfg.Services.Auth.Address, cfg.Services.Auth.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Error("Failed to connect to Auth Service", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	defer authConn.Close()
+
 	userClient := user_client.NewUserClient(userConn, log)
+	authClient := auth_client.NewAuthClient(authConn, log)
 
 	server := api.NewAPIServer(
 		fmt.Sprintf("%s:%d", cfg.HTTPServer.Address, cfg.HTTPServer.Port),
 		log,
 		userClient,
+		authClient,
 	)
 
 	quit := make(chan os.Signal, 1)

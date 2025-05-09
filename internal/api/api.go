@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/config"
+	auth_client "pinstack-api-gateway/internal/clients/auth"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"pinstack-api-gateway/internal/logger"
 	"time"
@@ -16,18 +17,20 @@ type APIServer struct {
 	router     *Router
 	server     *http.Server
 	userClient user_client.UserClient
+	authClient auth_client.AuthClient
 }
 
-func NewAPIServer(address string, log *logger.Logger, userClient user_client.UserClient) *APIServer {
+func NewAPIServer(address string, log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient) *APIServer {
 	return &APIServer{
 		address:    address,
 		log:        log,
 		userClient: userClient,
+		authClient: authClient,
 	}
 }
 
 func (s *APIServer) Run(cfg *config.Config) error {
-	s.router = NewRouter(s.log, s.userClient)
+	s.router = NewRouter(s.log, s.userClient, s.authClient)
 	s.router.Setup(cfg)
 
 	s.server = &http.Server{
