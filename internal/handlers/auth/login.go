@@ -2,12 +2,15 @@ package auth_handler
 
 import (
 	"encoding/json"
-	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
+
+	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -28,6 +31,21 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	tokens, err := h.authClient.Login(r.Context(), &req)
 	if err != nil {
 		h.log.Error("login failed", slog.String("error", err.Error()))
+
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.InvalidArgument:
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidCredentials.Error())
+				return
+			case codes.NotFound:
+				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+				return
+			case codes.Internal:
+				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+				return
+			}
+		}
+
 		switch err {
 		case custom_errors.ErrInvalidCredentials:
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidCredentials.Error())

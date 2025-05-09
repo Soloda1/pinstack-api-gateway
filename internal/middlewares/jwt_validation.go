@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
+	"pinstack-api-gateway/internal/utils"
 	"strings"
 	"time"
 
@@ -32,14 +33,14 @@ func JWTValidationMiddleware(secretKey string, log *logger.Logger) func(next htt
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				entry.Error("authorization header is missing")
-				http.Error(w, custom_errors.ErrUnauthenticated.Error(), http.StatusUnauthorized)
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 				return
 			}
 
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
 				entry.Error("invalid authorization header format")
-				http.Error(w, custom_errors.ErrInvalidToken.Error(), http.StatusUnauthorized)
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidToken.Error())
 				return
 			}
 
@@ -56,11 +57,11 @@ func JWTValidationMiddleware(secretKey string, log *logger.Logger) func(next htt
 				entry.Error("token validation failed", slog.String("error", err.Error()))
 				switch {
 				case errors.Is(err, jwt.ErrTokenExpired):
-					http.Error(w, custom_errors.ErrTokenExpired.Error(), http.StatusUnauthorized)
+					utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrTokenExpired.Error())
 				case errors.Is(err, jwt.ErrTokenMalformed):
-					http.Error(w, custom_errors.ErrInvalidToken.Error(), http.StatusUnauthorized)
+					utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidToken.Error())
 				default:
-					http.Error(w, custom_errors.ErrUnauthenticated.Error(), http.StatusUnauthorized)
+					utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 				}
 				return
 			}
@@ -68,7 +69,7 @@ func JWTValidationMiddleware(secretKey string, log *logger.Logger) func(next htt
 			claims, ok := token.Claims.(*Claims)
 			if !ok {
 				entry.Error("invalid token claims")
-				http.Error(w, custom_errors.ErrInvalidToken.Error(), http.StatusUnauthorized)
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidToken.Error())
 				return
 			}
 

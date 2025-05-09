@@ -7,6 +7,9 @@ import (
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
 
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -33,6 +36,24 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	err := h.authClient.Logout(r.Context(), req.RefreshToken)
 	if err != nil {
 		h.log.Error("logout failed", slog.String("error", err.Error()))
+
+		if st, ok := status.FromError(err); ok {
+			switch st.Code() {
+			case codes.InvalidArgument:
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidRefreshToken.Error())
+				return
+			case codes.Unauthenticated:
+				utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
+				return
+			case codes.NotFound:
+				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+				return
+			case codes.Internal:
+				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+				return
+			}
+		}
+
 		switch err {
 		case custom_errors.ErrInvalidRefreshToken:
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidRefreshToken.Error())
@@ -40,6 +61,8 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrTokenExpired.Error())
 		case custom_errors.ErrUnauthenticated:
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
+		case custom_errors.ErrUserNotFound:
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 		}

@@ -47,6 +47,8 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidCredentials.Error())
 		case custom_errors.ErrUserNotFound:
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		case custom_errors.ErrOperationNotAllowed:
+			utils.SendError(w, http.StatusForbidden, custom_errors.ErrOperationNotAllowed.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 		}

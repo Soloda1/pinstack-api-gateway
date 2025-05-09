@@ -78,7 +78,12 @@ func (c *authClient) Login(ctx context.Context, req *models.LoginRequest) (*mode
 			case codes.NotFound:
 				return nil, custom_errors.ErrUserNotFound
 			case codes.InvalidArgument:
-				if st.Message() == "invalid credentials" {
+				switch st.Message() {
+				case "invalid credentials":
+					return nil, custom_errors.ErrInvalidCredentials
+				case "invalid password":
+					return nil, custom_errors.ErrInvalidCredentials
+				case "invalid login":
 					return nil, custom_errors.ErrInvalidCredentials
 				}
 			}
@@ -102,11 +107,18 @@ func (c *authClient) Refresh(ctx context.Context, refreshToken string) (*models.
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
-				if st.Message() == "invalid refresh token" {
+				switch st.Message() {
+				case "invalid refresh token":
+					return nil, custom_errors.ErrInvalidRefreshToken
+				case "token expired":
+					return nil, custom_errors.ErrTokenExpired
+				case "invalid token":
 					return nil, custom_errors.ErrInvalidRefreshToken
 				}
 			case codes.Unauthenticated:
 				return nil, custom_errors.ErrUnauthenticated
+			case codes.NotFound:
+				return nil, custom_errors.ErrUserNotFound
 			}
 		}
 		return nil, custom_errors.ErrExternalServiceError
@@ -126,8 +138,20 @@ func (c *authClient) Logout(ctx context.Context, refreshToken string) error {
 	if err != nil {
 		c.log.Error("Failed to logout user", "error", err)
 		if st, ok := status.FromError(err); ok {
-			if st.Code() == codes.InvalidArgument {
-				return custom_errors.ErrInvalidRefreshToken
+			switch st.Code() {
+			case codes.InvalidArgument:
+				switch st.Message() {
+				case "invalid refresh token":
+					return custom_errors.ErrInvalidRefreshToken
+				case "token expired":
+					return custom_errors.ErrTokenExpired
+				case "invalid token":
+					return custom_errors.ErrInvalidRefreshToken
+				}
+			case codes.Unauthenticated:
+				return custom_errors.ErrUnauthenticated
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
 			}
 		}
 		return custom_errors.ErrExternalServiceError
@@ -150,10 +174,12 @@ func (c *authClient) UpdatePassword(ctx context.Context, req *models.UpdatePassw
 			case codes.NotFound:
 				return custom_errors.ErrUserNotFound
 			case codes.InvalidArgument:
-				if st.Message() == "invalid old password" {
+				switch st.Message() {
+				case "invalid password":
 					return custom_errors.ErrInvalidCredentials
-				}
-				if st.Message() == "invalid new password" {
+				case "invalid old password":
+					return custom_errors.ErrInvalidCredentials
+				case "invalid new password":
 					return custom_errors.ErrInvalidPassword
 				}
 			case codes.PermissionDenied:
