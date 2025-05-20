@@ -91,3 +91,17 @@ var (
 	ErrAvatarUploadFailed  = errors.New("avatar upload failed")
 	ErrAvatarDeleteFailed  = errors.New("avatar delete failed")
 )
+
+// Ошибки постов
+var (
+	ErrPostNotFound      = errors.New("post not found")
+	ErrNoUpdateRows      = errors.New("no post update rows")
+	ErrPostValidation    = errors.New("post validation failed")
+	ErrInvalidTagName    = errors.New("invalid tag name")
+	ErrTagNotFound       = errors.New("tag not found")
+	ErrTagsNotFound      = errors.New("tags not found")
+	ErrTagAlreadyExists  = errors.New("tag already exists")
+	ErrMediaNotFound     = errors.New("media not found")
+	ErrMediaAttachFailed = errors.New("failed to attach media to post")
+	ErrMediaDetachFailed = errors.New("failed to detach media from post")
+)
