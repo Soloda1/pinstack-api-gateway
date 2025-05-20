@@ -10,5 +10,5 @@ type PostClient interface {
 	GetPostByID(ctx context.Context, id int64) (*models.PostDetailed, error)
 	ListPosts(ctx context.Context, filters *models.PostFilters) ([]*models.PostDetailed, error)
 	UpdatePost(ctx context.Context, id int64, post *models.UpdatePostDTO) error
-	DeletePost(ctx context.Context, id int64) error
+	DeletePost(ctx context.Context, userID int64, id int64) error
 }

@@ -102,9 +102,9 @@ func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.Upda
 	return nil
 }
 
-func (c *postClient) DeletePost(ctx context.Context, id int64) error {
+func (c *postClient) DeletePost(ctx context.Context, userID int64, id int64) error {
 	c.log.Info("Deleting post", "id", id)
-	_, err := c.client.DeletePost(ctx, &pb.DeletePostRequest{Id: id})
+	_, err := c.client.DeletePost(ctx, &pb.DeletePostRequest{UserId: userID, Id: id})
 	if err != nil {
 		c.log.Error("Failed to delete post", "id", id, "error", err)
 		if st, ok := status.FromError(err); ok {
