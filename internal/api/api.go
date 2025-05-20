@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"pinstack-api-gateway/config"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
+	post_client "pinstack-api-gateway/internal/clients/post"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"pinstack-api-gateway/internal/logger"
 	"time"
@@ -18,14 +19,16 @@ type APIServer struct {
 	server     *http.Server
 	userClient user_client.UserClient
 	authClient auth_client.AuthClient
+	postClient post_client.PostClient
 }
 
-func NewAPIServer(address string, log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient) *APIServer {
+func NewAPIServer(address string, log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient) *APIServer {
 	return &APIServer{
 		address:    address,
 		log:        log,
 		userClient: userClient,
 		authClient: authClient,
+		postClient: postClient,
 	}
 }
 

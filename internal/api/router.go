@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"pinstack-api-gateway/config"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
+	post_client "pinstack-api-gateway/internal/clients/post"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	auth_handler "pinstack-api-gateway/internal/handlers/auth"
+	post_handler "pinstack-api-gateway/internal/handlers/post"
 	user_handler "pinstack-api-gateway/internal/handlers/user"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/middlewares"
@@ -20,6 +22,7 @@ type Router struct {
 	log        *logger.Logger
 	userClient user_client.UserClient
 	authClient auth_client.AuthClient
+	postClient post_client.PostClient
 }
 
 func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient) *Router {
@@ -43,6 +46,7 @@ func (r *Router) Setup(cfg *config.Config) {
 	r.router.Route("/api/v1", func(v1 chi.Router) {
 		v1.Mount("/users", r.setupUserRoutes(jwtMiddleware))
 		v1.Mount("/auth", r.setupAuthRoutes(jwtMiddleware))
+		v1.Mount("/posts", r.setupPostRoutes(jwtMiddleware))
 	})
 }
 
@@ -78,6 +82,22 @@ func (r *Router) setupAuthRoutes(jwtMiddleware func(next http.Handler) http.Hand
 	router.Group(func(r chi.Router) {
 		r.Use(jwtMiddleware)
 		r.Post("/update-password", authHandler.UpdatePassword)
+	})
+
+	return router
+}
+
+func (r *Router) setupPostRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
+	postHandler := post_handler.NewPostHandler(r.postClient, r.log)
+	router := chi.NewRouter()
+
+	router.Get("/", postHandler.List)
+	router.Get("/{id}", postHandler.Get)
+	router.Group(func(r chi.Router) {
+		r.Use(jwtMiddleware)
+		r.Post("/", postHandler.Create)
+		r.Put("/{id}", postHandler.Update)
+		r.Delete("/{id}", postHandler.Delete)
 	})
 
 	return router
