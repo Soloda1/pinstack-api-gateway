@@ -2,6 +2,7 @@ package auth_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -46,10 +47,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		switch err {
-		case custom_errors.ErrInvalidCredentials:
+		switch {
+		case errors.Is(err, custom_errors.ErrInvalidCredentials):
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidCredentials.Error())
-		case custom_errors.ErrUserNotFound:
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
