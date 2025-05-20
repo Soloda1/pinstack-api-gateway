@@ -1,33 +1,34 @@
 package models
 
 import (
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	pb "github.com/soloda1/pinstack-proto-definitions/gen/go/pinstack-proto-definitions/post/v1"
 )
 
 type CreatePostDTO struct {
-	AuthorID   int64             `json:"author_id"`
-	Title      string            `json:"title"`
+	AuthorID   int64             `json:"author_id" validate:"required"`
+	Title      string            `json:"title" validate:"required,min=1,max=255"`
 	Content    *string           `json:"content,omitempty"`
 	Tags       []string          `json:"tags,omitempty"`
-	MediaItems []*PostMediaInput `json:"media_items,omitempty"`
+	MediaItems []*PostMediaInput `json:"media_items,omitempty" validate:"max=9,dive"`
 }
 
 type PostMediaInput struct {
-	URL      string    `json:"url"`
-	Type     MediaType `json:"type"`
-	Position int32     `json:"position"`
+	URL      string    `json:"url" validate:"required,url,max=512"`
+	Type     MediaType `json:"type" validate:"required,oneof=image video"`
+	Position int32     `json:"position" validate:"gte=0,lte=100"`
 }
 
 type Post struct {
-	ID        int64     `json:"id"`
-	AuthorID  int64     `json:"author_id"`
-	Title     string    `json:"title"`
+	ID        int64     `json:"id" validate:"required"`
+	AuthorID  int64     `json:"author_id" validate:"required"`
+	Title     string    `json:"title" validate:"required,min=1,max=255"`
 	Content   *string   `json:"content,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at" validate:"required"`
+	UpdatedAt time.Time `json:"updated_at" validate:"required"`
 }
 
 type PostDetailed struct {
@@ -38,21 +39,21 @@ type PostDetailed struct {
 }
 
 type PostFilters struct {
-	AuthorID      *int64
-	TagNames      []string
-	CreatedAfter  *time.Time
-	CreatedBefore *time.Time
-	Limit         *int
-	Offset        *int
+	AuthorID      *int64     `json:"author_id,omitempty"`
+	TagNames      []string   `json:"tag_names,omitempty"`
+	CreatedAfter  *time.Time `json:"created_after,omitempty"`
+	CreatedBefore *time.Time `json:"created_before,omitempty"`
+	Limit         *int       `json:"limit,omitempty"`
+	Offset        *int       `json:"offset,omitempty"`
 }
 
 type PostMedia struct {
-	ID        int64     `json:"id"`
-	PostID    int64     `json:"post_id"`
-	URL       string    `json:"url"`
-	Type      MediaType `json:"type"`
-	Position  int32     `json:"position"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int64     `json:"id" validate:"required"`
+	PostID    int64     `json:"post_id" validate:"required"`
+	URL       string    `json:"url" validate:"required,url,max=512"`
+	Type      MediaType `json:"type" validate:"required,oneof=image video"`
+	Position  int32     `json:"position" validate:"gte=0,lte=100"`
+	CreatedAt time.Time `json:"created_at" validate:"required"`
 }
 
 type MediaType string
@@ -63,20 +64,20 @@ const (
 )
 
 type PostTag struct {
-	PostID int64 `json:"post_id"`
-	TagID  int64 `json:"tag_id"`
+	PostID int64 `json:"post_id" validate:"required"`
+	TagID  int64 `json:"tag_id" validate:"required"`
 }
 
 type Tag struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID   int64  `json:"id" validate:"required"`
+	Name string `json:"name" validate:"required,min=1,max=255"`
 }
 
 type UpdatePostDTO struct {
-	Title      *string           `json:"title,omitempty"`
+	Title      *string           `json:"title,omitempty" validate:"omitempty,min=1,max=255"`
 	Content    *string           `json:"content,omitempty"`
 	Tags       []string          `json:"tags,omitempty"`
-	MediaItems []*PostMediaInput `json:"media_items,omitempty"`
+	MediaItems []*PostMediaInput `json:"media_items,omitempty" validate:"max=9,dive"`
 }
 
 func CreatePostDTOToProto(dto *CreatePostDTO) *pb.CreatePostRequest {
