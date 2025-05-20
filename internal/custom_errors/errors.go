@@ -29,6 +29,7 @@ var (
 	ErrValidationFailed = errors.New("validation failed")
 	ErrInvalidInput     = errors.New("invalid input")
 	ErrRequiredField    = errors.New("required field is missing")
+	ErrForbidden        = errors.New("forbidden")
 )
 
 // Ошибки базы данных

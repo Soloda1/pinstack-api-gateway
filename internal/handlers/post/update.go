@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
@@ -53,6 +54,14 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	claimsRaw := r.Context().Value("claims")
+	claims, ok := claimsRaw.(*middlewares.Claims)
+	if !ok {
+		h.log.Debug("No claims found in context")
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
+		return
+	}
+
 	var req UpdatePostRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Debug("Failed to decode update post request", slog.String("error", err.Error()))
@@ -68,6 +77,7 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	modelReq := &models.UpdatePostDTO{
+		UserID:  claims.UserID,
 		Title:   req.Title,
 		Content: req.Content,
 		Tags:    req.Tags,
@@ -94,6 +104,9 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 				return
 			case codes.NotFound:
 				utils.SendError(w, http.StatusNotFound, custom_errors.ErrPostNotFound.Error())
+				return
+			case codes.PermissionDenied:
+				utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
 				return
 			case codes.Internal:
 				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

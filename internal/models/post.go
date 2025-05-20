@@ -74,6 +74,7 @@ type Tag struct {
 }
 
 type UpdatePostDTO struct {
+	UserID     int64             `json:"user_id" validate:"required"`
 	Title      *string           `json:"title,omitempty" validate:"omitempty,min=1,max=255"`
 	Content    *string           `json:"content,omitempty"`
 	Tags       []string          `json:"tags,omitempty"`
@@ -115,6 +116,7 @@ func UpdatePostDTOToProto(id int64, dto *UpdatePostDTO) *pb.UpdatePostRequest {
 	}
 	return &pb.UpdatePostRequest{
 		Id:      id,
+		UserId:  dto.UserID,
 		Title:   derefString(dto.Title),
 		Content: derefString(dto.Content),
 		Tags:    dto.Tags,
