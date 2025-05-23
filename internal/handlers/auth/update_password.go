@@ -12,8 +12,17 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required,min=6"`
+	NewPassword string `json:"new_password" validate:"required,min=6"`
+}
+
+type UpdatePasswordResponse struct {
+	Message string `json:"message"`
+}
+
 func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
-	var req models.UpdatePasswordRequest
+	var req UpdatePasswordRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Debug("Failed to decode update password request", slog.String("error", err.Error()))
@@ -35,9 +44,14 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.ID = claims.UserID
+	// Convert to models struct
+	modelReq := &models.UpdatePasswordRequest{
+		ID:          claims.UserID,
+		OldPassword: req.OldPassword,
+		NewPassword: req.NewPassword,
+	}
 
-	err = h.authClient.UpdatePassword(r.Context(), &req)
+	err = h.authClient.UpdatePassword(r.Context(), modelReq)
 	if err != nil {
 		h.log.Error("update password failed", slog.String("error", err.Error()))
 		switch err {
@@ -55,5 +69,9 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Send(w, http.StatusOK, nil)
+	response := UpdatePasswordResponse{
+		Message: "Password updated successfully",
+	}
+
+	utils.Send(w, http.StatusOK, response)
 }

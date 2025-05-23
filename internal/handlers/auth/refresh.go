@@ -17,6 +17,11 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req RefreshTokenRequest
 
@@ -69,5 +74,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Send(w, http.StatusOK, tokens)
+	// В конце функции заменить:
+	response := RefreshTokenResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}
+
+	utils.Send(w, http.StatusOK, response)
 }

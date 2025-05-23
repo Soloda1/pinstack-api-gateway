@@ -14,8 +14,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type LoginRequest struct {
+	Login    string `json:"login" validate:"required"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req models.LoginRequest
+	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Debug("Failed to decode login request", slog.String("error", err.Error()))
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
@@ -29,7 +39,13 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokens, err := h.authClient.Login(r.Context(), &req)
+	// Convert to models struct
+	modelReq := &models.LoginRequest{
+		Login:    req.Login,
+		Password: req.Password,
+	}
+
+	tokens, err := h.authClient.Login(r.Context(), modelReq)
 	if err != nil {
 		h.log.Error("login failed", slog.String("error", err.Error()))
 
@@ -58,5 +74,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Send(w, http.StatusOK, tokens)
+	response := LoginResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}
+
+	utils.Send(w, http.StatusOK, response)
 }

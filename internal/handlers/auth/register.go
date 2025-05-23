@@ -10,8 +10,22 @@ import (
 	"pinstack-api-gateway/internal/utils"
 )
 
+type RegisterRequest struct {
+	Username  string  `json:"username" validate:"required,min=3,max=32"`
+	Email     string  `json:"email" validate:"required,email"`
+	Password  string  `json:"password" validate:"required,min=6"`
+	FullName  *string `json:"full_name,omitempty"`
+	Bio       *string `json:"bio,omitempty"`
+	AvatarURL *string `json:"avatar_url,omitempty"`
+}
+
+type RegisterResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req models.RegisterRequest
+	var req RegisterRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.log.Debug("Failed to decode register request", slog.String("error", err.Error()))
@@ -26,7 +40,17 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokens, err := h.authClient.Register(r.Context(), &req)
+	// Convert to models struct
+	modelReq := &models.RegisterRequest{
+		Username:  req.Username,
+		Email:     req.Email,
+		Password:  req.Password,
+		FullName:  req.FullName,
+		Bio:       req.Bio,
+		AvatarURL: req.AvatarURL,
+	}
+
+	tokens, err := h.authClient.Register(r.Context(), modelReq)
 	if err != nil {
 		h.log.Error("register failed", slog.String("error", err.Error()))
 		switch err {
@@ -48,5 +72,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.Send(w, http.StatusCreated, tokens)
+	response := RegisterResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}
+
+	utils.Send(w, http.StatusCreated, response)
 }
