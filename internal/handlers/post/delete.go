@@ -9,6 +9,20 @@ import (
 	"strconv"
 )
 
+// Delete godoc
+// @Summary Delete a post
+// @Description Delete an existing post by ID
+// @Tags posts
+// @Produce json
+// @Security BearerAuth
+// @Param id query string true "Post ID"
+// @Success 200 {object} map[string]string "Post deleted successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Failure 404 {object} map[string]string "Post not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts [delete]
 func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {

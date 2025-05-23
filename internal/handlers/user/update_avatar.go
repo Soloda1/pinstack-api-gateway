@@ -15,6 +15,22 @@ type UpdateAvatarRequest struct {
 	AvatarURL string `json:"avatar_url" validate:"required,url"`
 }
 
+// UpdateAvatar godoc
+// @Summary Update user avatar
+// @Description Update the avatar URL for a user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID"
+// @Param request body UpdateAvatarRequest true "Avatar update data"
+// @Success 200 {object} nil "Avatar updated successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Operation not allowed"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id}/avatar [put]
 func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

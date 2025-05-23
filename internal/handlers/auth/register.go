@@ -2,12 +2,13 @@ package auth_handler
 
 import (
 	"encoding/json"
-	"github.com/go-playground/validator/v10"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type RegisterRequest struct {
@@ -24,6 +25,18 @@ type RegisterResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// Register godoc
+// @Summary User registration
+// @Description Register a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body RegisterRequest true "User registration data"
+// @Success 201 {object} RegisterResponse "Successful registration"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 409 {object} map[string]string "User already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 

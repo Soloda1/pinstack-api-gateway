@@ -19,6 +19,19 @@ type GetUserByUsernameResponse struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+// GetUserByUsername godoc
+// @Summary Get user by username
+// @Description Get user information by username
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param username path string true "User username"
+// @Success 200 {object} GetUserByUsernameResponse "User information"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/username/{username} [get]
 func (h *UserHandler) GetUserByUsername(w http.ResponseWriter, r *http.Request) {
 	username := chi.URLParam(r, "username")
 	if username == "" {

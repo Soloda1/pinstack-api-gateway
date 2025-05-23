@@ -9,6 +9,19 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// DeleteUser godoc
+// @Summary Delete user by ID
+// @Description Delete a user by their ID
+// @Tags users
+// @Security BearerAuth
+// @Param id path string true "User ID"
+// @Success 204 {object} nil "User deleted successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Operation not allowed"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id} [delete]
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

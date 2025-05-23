@@ -30,6 +30,20 @@ type CreateUserResponse struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with provided data
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateUserRequest true "User creation data"
+// @Success 201 {object} CreateUserResponse "User created successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 409 {object} map[string]string "User already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

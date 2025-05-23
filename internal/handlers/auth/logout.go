@@ -17,6 +17,18 @@ type LogoutRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
 
+// Logout godoc
+// @Summary User logout
+// @Description Logout user and invalidate refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body LogoutRequest true "Logout data"
+// @Success 200 {object} map[string]string "Successful logout"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Invalid refresh token"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req LogoutRequest
 

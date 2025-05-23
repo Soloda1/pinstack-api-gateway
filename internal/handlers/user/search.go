@@ -23,6 +23,20 @@ type UserResponse struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+// SearchUsers godoc
+// @Summary Search users
+// @Description Search users by query string
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param query query string true "Search query"
+// @Param page query int false "Page number"
+// @Param limit query int false "Results per page (max 100)"
+// @Success 200 {object} SearchUsersResponse "Search results"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/search [get]
 func (h *UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
 	if query == "" {

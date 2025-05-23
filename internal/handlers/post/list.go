@@ -46,6 +46,17 @@ type ListPostAuthor struct {
 	AvatarURL *string `json:"avatar_url,omitempty"`
 }
 
+// List godoc
+// @Summary List posts with filters
+// @Description Get a list of posts with optional filtering by author, tags, and date range
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param request body ListPostsRequest false "Filter parameters"
+// @Success 200 {object} ListPostsResponse "List of posts"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts/list [post]
 func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 	var req ListPostsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

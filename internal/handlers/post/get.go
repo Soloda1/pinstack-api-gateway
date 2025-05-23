@@ -42,6 +42,17 @@ type GetPostTag struct {
 	Name string `json:"name"`
 }
 
+// Get godoc
+// @Summary Get post by ID
+// @Description Get detailed information about a specific post
+// @Tags posts
+// @Produce json
+// @Param id query string true "Post ID"
+// @Success 200 {object} GetPostResponse "Post information"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 404 {object} map[string]string "Post not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts [get]
 func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {

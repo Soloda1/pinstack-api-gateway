@@ -40,6 +40,22 @@ type UpdatePostAuthor struct {
 	AvatarURL *string `json:"avatar_url,omitempty"`
 }
 
+// Update godoc
+// @Summary Update a post
+// @Description Update an existing post with new data
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id query string true "Post ID"
+// @Param request body UpdatePostRequest true "Post update data"
+// @Success 200 {object} UpdatePostResponse "Post updated successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Failure 404 {object} map[string]string "Post not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts [put]
 func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := r.URL.Query().Get("id")
 	if idStr == "" {

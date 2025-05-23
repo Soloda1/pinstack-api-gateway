@@ -31,6 +31,22 @@ type UpdateUserResponse struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+// UpdateUser godoc
+// @Summary Update user information
+// @Description Update user fields by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "User ID"
+// @Param request body UpdateUserRequest true "User update data"
+// @Success 200 {object} UpdateUserResponse "User updated successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 409 {object} map[string]string "Username or email already exists"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/{id} [put]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

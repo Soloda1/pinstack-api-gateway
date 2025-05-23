@@ -19,6 +19,19 @@ type GetUserByEmailResponse struct {
 	UpdatedAt string  `json:"updated_at"`
 }
 
+// GetUserByEmail godoc
+// @Summary Get user by email
+// @Description Get user information by email
+// @Tags users
+// @Produce json
+// @Security BearerAuth
+// @Param email path string true "User email"
+// @Success 200 {object} GetUserByEmailResponse "User information"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /users/email/{email} [get]
 func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	email := chi.URLParam(r, "email")
 	if email == "" {

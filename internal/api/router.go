@@ -13,8 +13,9 @@ import (
 	"pinstack-api-gateway/internal/middlewares"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Router struct {
@@ -42,6 +43,8 @@ func (r *Router) Setup(cfg *config.Config) {
 	r.router.Use(middleware.Timeout(time.Duration(cfg.HTTPServer.Timeout) * time.Second))
 
 	jwtMiddleware := middlewares.JWTValidationMiddleware(cfg.JWT.Secret, r.log)
+
+	r.router.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.router.Route("/api/v1", func(v1 chi.Router) {
 		v1.Mount("/users", r.setupUserRoutes(jwtMiddleware))

@@ -21,6 +21,21 @@ type UpdatePasswordResponse struct {
 	Message string `json:"message"`
 }
 
+// UpdatePassword godoc
+// @Summary Update user password
+// @Description Update user password with old and new password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body UpdatePasswordRequest true "Password update data"
+// @Success 200 {object} UpdatePasswordResponse "Password updated successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Forbidden"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/update-password [post]
 func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var req UpdatePasswordRequest
 

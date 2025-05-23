@@ -55,6 +55,19 @@ type TagResponse struct {
 	Name string `json:"name"`
 }
 
+// Create godoc
+// @Summary Create a new post
+// @Description Create a new post with title, content, tags and media
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreatePostRequest true "Post creation data"
+// @Success 201 {object} CreatePostResponse "Post created successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /posts [post]
 func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreatePostRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
