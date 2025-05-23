@@ -374,55 +374,6 @@ const docTemplate = `{
             }
         },
         "/posts": {
-            "get": {
-                "description": "Get a list of posts with optional filtering by author, tags, and date range",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "List posts with filters",
-                "parameters": [
-                    {
-                        "description": "Filter parameters",
-                        "name": "request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/post_handler.ListPostsRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "List of posts",
-                        "schema": {
-                            "$ref": "#/definitions/post_handler.ListPostsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -469,6 +420,57 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/posts/list": {
+            "post": {
+                "description": "Get a list of posts with optional filtering by author, tags, and date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "List posts with filters",
+                "parameters": [
+                    {
+                        "description": "Filter parameters",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/post_handler.ListPostsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of posts",
+                        "schema": {
+                            "$ref": "#/definitions/post_handler.ListPostsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

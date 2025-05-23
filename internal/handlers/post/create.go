@@ -107,7 +107,6 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-	h.log.Debug("modelReq", slog.Any("modelReq", modelReq))
 
 	post, err := h.postClient.CreatePost(r.Context(), modelReq)
 	if err != nil {
@@ -139,16 +138,12 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	h.log.Debug("created post", slog.Any("post", post))
 
 	resp := CreatePostResponse{
-		ID:              post.Post.ID,
-		Title:           post.Post.Title,
-		Content:         post.Post.Content,
-		CreatedAt:       post.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:       post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		AuthorID:        post.Author.ID,
-		AuthorUsername:  post.Author.Username,
-		AuthorFullName:  post.Author.FullName,
-		AuthorBio:       post.Author.Bio,
-		AuthorAvatarURL: post.Author.AvatarURL,
+		ID:        post.Post.ID,
+		Title:     post.Post.Title,
+		Content:   post.Post.Content,
+		CreatedAt: post.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		AuthorID:  post.Post.AuthorID,
 	}
 	if len(post.Media) > 0 {
 		resp.Media = make([]PostMediaResponse, len(post.Media))

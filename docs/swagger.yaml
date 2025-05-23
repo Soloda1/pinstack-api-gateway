@@ -754,39 +754,6 @@ paths:
       tags:
       - auth
   /posts:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of posts with optional filtering by author, tags, and
-        date range
-      parameters:
-      - description: Filter parameters
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/post_handler.ListPostsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of posts
-          schema:
-            $ref: '#/definitions/post_handler.ListPostsResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: List posts with filters
-      tags:
-      - posts
     post:
       consumes:
       - application/json
@@ -973,6 +940,40 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a post
+      tags:
+      - posts
+  /posts/list:
+    post:
+      consumes:
+      - application/json
+      description: Get a list of posts with optional filtering by author, tags, and
+        date range
+      parameters:
+      - description: Filter parameters
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/post_handler.ListPostsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of posts
+          schema:
+            $ref: '#/definitions/post_handler.ListPostsResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List posts with filters
       tags:
       - posts
   /users:
