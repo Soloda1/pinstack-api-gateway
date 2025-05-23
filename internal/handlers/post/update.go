@@ -10,6 +10,7 @@ import (
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 
+	"github.com/go-chi/chi"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -47,7 +48,7 @@ type UpdatePostAuthor struct {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id query string true "Post ID"
+// @Param id path string true "Post ID"
 // @Param request body UpdatePostRequest true "Post update data"
 // @Success 200 {object} UpdatePostResponse "Post updated successfully"
 // @Failure 400 {object} map[string]string "Bad request"
@@ -55,11 +56,11 @@ type UpdatePostAuthor struct {
 // @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 404 {object} map[string]string "Post not found"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /posts [put]
+// @Router /posts/{id} [put]
 func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
-		h.log.Debug("Missing post id in query params")
+		h.log.Debug("Missing post id in path params")
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
 		return
 	}

@@ -26,12 +26,13 @@ type Router struct {
 	postClient post_client.PostClient
 }
 
-func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient) *Router {
+func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient) *Router {
 	return &Router{
 		router:     chi.NewRouter(),
 		log:        log,
 		userClient: userClient,
 		authClient: authClient,
+		postClient: postClient,
 	}
 }
 

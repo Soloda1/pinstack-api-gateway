@@ -754,11 +754,86 @@ paths:
       tags:
       - auth
   /posts:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of posts with optional filtering by author, tags, and
+        date range
+      parameters:
+      - description: Filter parameters
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/post_handler.ListPostsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of posts
+          schema:
+            $ref: '#/definitions/post_handler.ListPostsResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List posts with filters
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: Create a new post with title, content, tags and media
+      parameters:
+      - description: Post creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/post_handler.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Post created successfully
+          schema:
+            $ref: '#/definitions/post_handler.CreatePostResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new post
+      tags:
+      - posts
+  /posts/{id}:
     delete:
       description: Delete an existing post by ID
       parameters:
       - description: Post ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -810,7 +885,7 @@ paths:
       description: Get detailed information about a specific post
       parameters:
       - description: Post ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -842,54 +917,13 @@ paths:
       summary: Get post by ID
       tags:
       - posts
-    post:
-      consumes:
-      - application/json
-      description: Create a new post with title, content, tags and media
-      parameters:
-      - description: Post creation data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/post_handler.CreatePostRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Post created successfully
-          schema:
-            $ref: '#/definitions/post_handler.CreatePostResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create a new post
-      tags:
-      - posts
     put:
       consumes:
       - application/json
       description: Update an existing post with new data
       parameters:
       - description: Post ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -939,40 +973,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update a post
-      tags:
-      - posts
-  /posts/list:
-    post:
-      consumes:
-      - application/json
-      description: Get a list of posts with optional filtering by author, tags, and
-        date range
-      parameters:
-      - description: Filter parameters
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/post_handler.ListPostsRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: List of posts
-          schema:
-            $ref: '#/definitions/post_handler.ListPostsResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: List posts with filters
       tags:
       - posts
   /users:

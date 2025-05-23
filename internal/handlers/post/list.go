@@ -56,7 +56,7 @@ type ListPostAuthor struct {
 // @Success 200 {object} ListPostsResponse "List of posts"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /posts/list [post]
+// @Router /posts [get]
 func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 	var req ListPostsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

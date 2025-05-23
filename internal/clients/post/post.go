@@ -2,6 +2,7 @@ package post_client
 
 import (
 	"context"
+	"log/slog"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
@@ -25,10 +26,10 @@ func NewPostClient(conn *grpc.ClientConn, log *logger.Logger) PostClient {
 }
 
 func (c *postClient) CreatePost(ctx context.Context, post *models.CreatePostDTO) (*models.PostDetailed, error) {
-	c.log.Info("Creating post", "title", post.Title)
+	c.log.Debug("Creating post", slog.String("title", post.Title))
 	resp, err := c.client.CreatePost(ctx, models.CreatePostDTOToProto(post))
 	if err != nil {
-		c.log.Error("Failed to create post", "error", err)
+		c.log.Error("Failed to create post", slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
@@ -39,14 +40,15 @@ func (c *postClient) CreatePost(ctx context.Context, post *models.CreatePostDTO)
 		}
 		return nil, custom_errors.ErrExternalServiceError
 	}
+	c.log.Debug("response client post", slog.Any("post", post))
 	return models.PostDetailedFromProto(resp), nil
 }
 
 func (c *postClient) GetPostByID(ctx context.Context, id int64) (*models.PostDetailed, error) {
-	c.log.Info("Getting post", "id", id)
+	c.log.Info("Getting post", slog.Int64("id", id))
 	resp, err := c.client.GetPost(ctx, &pb.GetPostRequest{Id: id})
 	if err != nil {
-		c.log.Error("Failed to get post", "id", id, "error", err)
+		c.log.Error("Failed to get post", slog.Int64("id", id), slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.NotFound:
@@ -63,11 +65,11 @@ func (c *postClient) GetPostByID(ctx context.Context, id int64) (*models.PostDet
 }
 
 func (c *postClient) ListPosts(ctx context.Context, filters *models.PostFilters) ([]*models.PostDetailed, error) {
-	c.log.Info("Listing posts", "filters", filters)
+	c.log.Info("Listing posts", slog.Any("filters", filters))
 	req := models.PostFiltersToProto(filters)
 	resp, err := c.client.ListPosts(ctx, req)
 	if err != nil {
-		c.log.Error("Failed to list posts", "error", err)
+		c.log.Error("Failed to list posts", slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			if st.Code() == codes.InvalidArgument {
 				return nil, custom_errors.ErrPostValidation
@@ -83,10 +85,10 @@ func (c *postClient) ListPosts(ctx context.Context, filters *models.PostFilters)
 }
 
 func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.UpdatePostDTO) error {
-	c.log.Info("Updating post", "id", id)
+	c.log.Info("Updating post", slog.Int64("id", id))
 	_, err := c.client.UpdatePost(ctx, models.UpdatePostDTOToProto(id, post))
 	if err != nil {
-		c.log.Error("Failed to update post", "id", id, "error", err)
+		c.log.Error("Failed to update post", slog.Int64("id", id), slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.NotFound:
@@ -103,10 +105,10 @@ func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.Upda
 }
 
 func (c *postClient) DeletePost(ctx context.Context, userID int64, id int64) error {
-	c.log.Info("Deleting post", "id", id)
+	c.log.Info("Deleting post", slog.Int64("id", id))
 	_, err := c.client.DeletePost(ctx, &pb.DeletePostRequest{UserId: userID, Id: id})
 	if err != nil {
-		c.log.Error("Failed to delete post", "id", id, "error", err)
+		c.log.Error("Failed to delete post", slog.Int64("id", id), slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.NotFound:

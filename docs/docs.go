@@ -375,66 +375,7 @@ const docTemplate = `{
         },
         "/posts": {
             "get": {
-                "description": "Get detailed information about a specific post",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "posts"
-                ],
-                "summary": "Get post by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Post ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Post information",
-                        "schema": {
-                            "$ref": "#/definitions/post_handler.GetPostResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Post not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update an existing post with new data",
+                "description": "Get a list of posts with optional filtering by author, tags, and date range",
                 "consumes": [
                     "application/json"
                 ],
@@ -444,61 +385,26 @@ const docTemplate = `{
                 "tags": [
                     "posts"
                 ],
-                "summary": "Update a post",
+                "summary": "List posts with filters",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Post ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "description": "Post update data",
+                        "description": "Filter parameters",
                         "name": "request",
                         "in": "body",
-                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/post_handler.UpdatePostRequest"
+                            "$ref": "#/definitions/post_handler.ListPostsRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Post updated successfully",
+                        "description": "List of posts",
                         "schema": {
-                            "$ref": "#/definitions/post_handler.UpdatePostResponse"
+                            "$ref": "#/definitions/post_handler.ListPostsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Post not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -580,38 +486,103 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Delete an existing post by ID",
+            }
+        },
+        "/posts/{id}": {
+            "get": {
+                "description": "Get detailed information about a specific post",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "posts"
                 ],
-                "summary": "Delete a post",
+                "summary": "Get post by ID",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Post ID",
                         "name": "id",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Post deleted successfully",
+                        "description": "Post information",
+                        "schema": {
+                            "$ref": "#/definitions/post_handler.GetPostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    },
+                    "404": {
+                        "description": "Post not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing post with new data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Update a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Post update data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/post_handler.UpdatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Post updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/post_handler.UpdatePostResponse"
                         }
                     },
                     "400": {
@@ -660,40 +631,69 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/posts/list": {
-            "post": {
-                "description": "Get a list of posts with optional filtering by author, tags, and date range",
-                "consumes": [
-                    "application/json"
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
                 ],
+                "description": "Delete an existing post by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "posts"
                 ],
-                "summary": "List posts with filters",
+                "summary": "Delete a post",
                 "parameters": [
                     {
-                        "description": "Filter parameters",
-                        "name": "request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/post_handler.ListPostsRequest"
-                        }
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of posts",
+                        "description": "Post deleted successfully",
                         "schema": {
-                            "$ref": "#/definitions/post_handler.ListPostsResponse"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Post not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

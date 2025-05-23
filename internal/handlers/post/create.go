@@ -2,16 +2,15 @@ package post_handler
 
 import (
 	"encoding/json"
+	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
-
-	"github.com/go-playground/validator/v10"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type CreatePostRequest struct {
@@ -90,6 +89,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
+	h.log.Debug("requested model", slog.Any("model", req))
 
 	modelReq := &models.CreatePostDTO{
 		AuthorID: claims.UserID,
@@ -98,15 +98,16 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Tags:     req.Tags,
 	}
 	if len(req.MediaItems) > 0 {
-		modelReq.MediaItems = make([]*models.PostMediaInput, len(req.MediaItems))
-		for i, item := range req.MediaItems {
-			modelReq.MediaItems[i] = &models.PostMediaInput{
+		modelReq.MediaItems = make([]*models.PostMediaInput, 0, len(req.MediaItems))
+		for _, item := range req.MediaItems {
+			modelReq.MediaItems = append(modelReq.MediaItems, &models.PostMediaInput{
 				URL:      item.URL,
 				Type:     models.MediaType(item.Type),
 				Position: item.Position,
-			}
+			})
 		}
 	}
+	h.log.Debug("modelReq", slog.Any("modelReq", modelReq))
 
 	post, err := h.postClient.CreatePost(r.Context(), modelReq)
 	if err != nil {
@@ -115,10 +116,19 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
-				utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+				utils.SendError(w, http.StatusBadRequest, "invalid input data")
 				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			case codes.Unauthenticated:
+				utils.SendError(w, http.StatusUnauthorized, "unauthenticated")
+				return
+			case codes.AlreadyExists:
+				utils.SendError(w, http.StatusConflict, "post already exists")
+				return
+			case codes.PermissionDenied:
+				utils.SendError(w, http.StatusForbidden, "access denied")
+				return
+			case codes.Unavailable:
+				utils.SendError(w, http.StatusServiceUnavailable, "service unavailable")
 				return
 			}
 		}
@@ -126,6 +136,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 		return
 	}
+	h.log.Debug("created post", slog.Any("post", post))
 
 	resp := CreatePostResponse{
 		ID:              post.Post.ID,
@@ -135,7 +146,6 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:       post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		AuthorID:        post.Author.ID,
 		AuthorUsername:  post.Author.Username,
-		AuthorEmail:     post.Author.Email,
 		AuthorFullName:  post.Author.FullName,
 		AuthorBio:       post.Author.Bio,
 		AuthorAvatarURL: post.Author.AvatarURL,

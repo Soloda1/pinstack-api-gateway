@@ -55,7 +55,7 @@ func NewAPIServer(address string, log *logger.Logger, userClient user_client.Use
 }
 
 func (s *APIServer) Run(cfg *config.Config) error {
-	s.router = NewRouter(s.log, s.userClient, s.authClient)
+	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient)
 	s.router.Setup(cfg)
 
 	s.server = &http.Server{

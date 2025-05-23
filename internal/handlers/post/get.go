@@ -6,6 +6,8 @@ import (
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
+
+	"github.com/go-chi/chi"
 )
 
 type GetPostRequest struct {
@@ -47,16 +49,16 @@ type GetPostTag struct {
 // @Description Get detailed information about a specific post
 // @Tags posts
 // @Produce json
-// @Param id query string true "Post ID"
+// @Param id path string true "Post ID"
 // @Success 200 {object} GetPostResponse "Post information"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 404 {object} map[string]string "Post not found"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /posts [get]
+// @Router /posts/{id} [get]
 func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Query().Get("id")
+	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
-		h.log.Debug("Missing post id in query params")
+		h.log.Debug("Missing post id in path params")
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
 		return
 	}
@@ -66,6 +68,7 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
 		return
 	}
+
 	post, err := h.postClient.GetPostByID(r.Context(), id)
 	if err != nil {
 		h.log.Error("get post failed", slog.String("error", err.Error()))
