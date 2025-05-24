@@ -95,7 +95,7 @@ func (r *Router) setupPostRoutes(jwtMiddleware func(next http.Handler) http.Hand
 	postHandler := post_handler.NewPostHandler(r.postClient, r.log)
 	router := chi.NewRouter()
 
-	router.Post("/list", postHandler.List)
+	router.Get("/list", postHandler.List)
 	router.Get("/{id}", postHandler.Get)
 	router.Group(func(r chi.Router) {
 		r.Use(jwtMiddleware)

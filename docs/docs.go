@@ -440,8 +440,8 @@ const docTemplate = `{
             }
         },
         "/posts/list": {
-            "post": {
-                "description": "Get a list of posts with optional filtering by author, tags, and date range",
+            "get": {
+                "description": "Get a list of posts with optional filtering by author and date range",
                 "consumes": [
                     "application/json"
                 ],
@@ -454,12 +454,34 @@ const docTemplate = `{
                 "summary": "List posts with filters",
                 "parameters": [
                     {
-                        "description": "Filter parameters",
-                        "name": "request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/post_handler.ListPostsRequest"
-                        }
+                        "type": "integer",
+                        "description": "Filter by author ID",
+                        "name": "author_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter posts created after this time (RFC3339 format)",
+                        "name": "created_after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter posts created before this time (RFC3339 format)",
+                        "name": "created_before",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit",
+                        "name": "limit",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1658,32 +1680,6 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
-                }
-            }
-        },
-        "post_handler.ListPostsRequest": {
-            "type": "object",
-            "properties": {
-                "author_id": {
-                    "type": "integer"
-                },
-                "created_after": {
-                    "type": "string"
-                },
-                "created_before": {
-                    "type": "string"
-                },
-                "limit": {
-                    "type": "integer"
-                },
-                "offset": {
-                    "type": "integer"
-                },
-                "tag_names": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             }
         },

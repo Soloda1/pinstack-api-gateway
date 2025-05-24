@@ -1,27 +1,17 @@
 package post_handler
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
+	"strconv"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-type ListPostsRequest struct {
-	AuthorID      *int64   `json:"author_id,omitempty"`
-	TagNames      []string `json:"tag_names,omitempty"`
-	CreatedAfter  *string  `json:"created_after,omitempty"`
-	CreatedBefore *string  `json:"created_before,omitempty"`
-	Offset        *int     `json:"offset,omitempty"`
-	Limit         *int     `json:"limit,omitempty"`
-}
 
 type ListPostsResponse struct {
 	Posts []ListPostItem `json:"posts"`
@@ -48,33 +38,36 @@ type ListPostAuthor struct {
 
 // List godoc
 // @Summary List posts with filters
-// @Description Get a list of posts with optional filtering by author, tags, and date range
+// @Description Get a list of posts with optional filtering by author and date range
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Param request body ListPostsRequest false "Filter parameters"
+// @Param author_id query int false "Filter by author ID"
+// @Param created_after query string false "Filter posts created after this time (RFC3339 format)"
+// @Param created_before query string false "Filter posts created before this time (RFC3339 format)"
+// @Param offset query int false "Pagination offset"
+// @Param limit query int false "Pagination limit"
 // @Success 200 {object} ListPostsResponse "List of posts"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /posts/list [post]
+// @Router /posts/list [get]
 func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
-	var req ListPostsRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.log.Debug("Failed to decode list posts request", slog.String("error", err.Error()))
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
-		return
-	}
-
-	validate := validator.New()
-	if err := validate.Struct(req); err != nil {
-		h.log.Debug("Failed to validate list posts request", slog.String("error", err.Error()))
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
-		return
+	query := r.URL.Query()
+	h.log.Debug("query info", slog.Any("query", query))
+	var authorID *int64
+	if authorIDStr := query.Get("author_id"); authorIDStr != "" {
+		id, err := strconv.ParseInt(authorIDStr, 10, 64)
+		if err != nil {
+			h.log.Debug("Invalid author_id format", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+			return
+		}
+		authorID = &id
 	}
 
 	var createdAfterTime *time.Time
-	if req.CreatedAfter != nil {
-		t, err := time.Parse(time.RFC3339, *req.CreatedAfter)
+	if createdAfterStr := query.Get("created_after"); createdAfterStr != "" {
+		t, err := time.Parse(time.RFC3339, createdAfterStr)
 		if err != nil {
 			h.log.Debug("Invalid created_after format", slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
@@ -82,9 +75,10 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 		createdAfterTime = &t
 	}
+
 	var createdBeforeTime *time.Time
-	if req.CreatedBefore != nil {
-		t, err := time.Parse(time.RFC3339, *req.CreatedBefore)
+	if createdBeforeStr := query.Get("created_before"); createdBeforeStr != "" {
+		t, err := time.Parse(time.RFC3339, createdBeforeStr)
 		if err != nil {
 			h.log.Debug("Invalid created_before format", slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
@@ -93,12 +87,31 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 		createdBeforeTime = &t
 	}
 
-	filters := models.PostFilters{}
-	if req.AuthorID != nil {
-		filters.AuthorID = req.AuthorID
+	var offset *int
+	if offsetStr := query.Get("offset"); offsetStr != "" {
+		offsetVal, err := strconv.Atoi(offsetStr)
+		if err != nil {
+			h.log.Debug("Invalid offset format", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+			return
+		}
+		offset = &offsetVal
 	}
-	if req.TagNames != nil {
-		filters.TagNames = req.TagNames
+
+	var limit *int
+	if limitStr := query.Get("limit"); limitStr != "" {
+		limitVal, err := strconv.Atoi(limitStr)
+		if err != nil {
+			h.log.Debug("Invalid limit format", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+			return
+		}
+		limit = &limitVal
+	}
+
+	filters := models.PostFilters{}
+	if authorID != nil {
+		filters.AuthorID = authorID
 	}
 	if createdAfterTime != nil {
 		filters.CreatedAfter = createdAfterTime
@@ -106,11 +119,11 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 	if createdBeforeTime != nil {
 		filters.CreatedBefore = createdBeforeTime
 	}
-	if req.Offset != nil {
-		filters.Offset = req.Offset
+	if offset != nil {
+		filters.Offset = offset
 	}
-	if req.Limit != nil {
-		filters.Limit = req.Limit
+	if limit != nil {
+		filters.Limit = limit
 	}
 
 	posts, err := h.postClient.ListPosts(r.Context(), &filters)

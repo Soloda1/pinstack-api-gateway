@@ -224,23 +224,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  post_handler.ListPostsRequest:
-    properties:
-      author_id:
-        type: integer
-      created_after:
-        type: string
-      created_before:
-        type: string
-      limit:
-        type: integer
-      offset:
-        type: integer
-      tag_names:
-        items:
-          type: string
-        type: array
-    type: object
   post_handler.ListPostsResponse:
     properties:
       posts:
@@ -943,17 +926,32 @@ paths:
       tags:
       - posts
   /posts/list:
-    post:
+    get:
       consumes:
       - application/json
-      description: Get a list of posts with optional filtering by author, tags, and
-        date range
+      description: Get a list of posts with optional filtering by author and date
+        range
       parameters:
-      - description: Filter parameters
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/post_handler.ListPostsRequest'
+      - description: Filter by author ID
+        in: query
+        name: author_id
+        type: integer
+      - description: Filter posts created after this time (RFC3339 format)
+        in: query
+        name: created_after
+        type: string
+      - description: Filter posts created before this time (RFC3339 format)
+        in: query
+        name: created_before
+        type: string
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:

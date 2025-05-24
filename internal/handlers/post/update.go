@@ -17,7 +17,7 @@ import (
 )
 
 type UpdatePostRequest struct {
-	Title      *string           `json:"title,omitempty" validate:"omitempty,min=1,max=255"`
+	Title      *string           `json:"title,omitempty" validate:"omitempty"`
 	Content    *string           `json:"content,omitempty"`
 	Tags       []string          `json:"tags,omitempty"`
 	MediaItems []*MediaItemInput `json:"media_items,omitempty" validate:"max=9,dive"`
