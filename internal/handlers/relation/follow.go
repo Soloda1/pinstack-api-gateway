@@ -76,6 +76,8 @@ func (h *RelationHandler) Follow(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		case errors.Is(err, custom_errors.ErrFollowRelationExists), errors.Is(err, custom_errors.ErrAlreadyFollowing):
+			utils.SendError(w, http.StatusConflict, custom_errors.ErrAlreadyFollowing.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 		}

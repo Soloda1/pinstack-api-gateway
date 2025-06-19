@@ -76,6 +76,8 @@ func (h *RelationHandler) Unfollow(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		case errors.Is(err, custom_errors.ErrFollowRelationNotFound):
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrFollowRelationNotFound.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 		}
