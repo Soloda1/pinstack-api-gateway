@@ -28,6 +28,7 @@ type FollowResponse struct {
 // @Tags relation
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body FollowRequest true "Follow request"
 // @Success 200 {object} FollowResponse "Followed successfully"
 // @Failure 400 {object} map[string]string "Bad request"

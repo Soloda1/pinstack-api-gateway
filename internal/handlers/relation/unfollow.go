@@ -28,6 +28,7 @@ type UnfollowResponse struct {
 // @Tags relation
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param request body UnfollowRequest true "Unfollow request"
 // @Success 200 {object} UnfollowResponse "Unfollowed successfully"
 // @Failure 400 {object} map[string]string "Bad request"

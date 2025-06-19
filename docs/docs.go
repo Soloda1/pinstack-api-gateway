@@ -730,6 +730,11 @@ const docTemplate = `{
         },
         "/relation/follow": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Follow another user",
                 "consumes": [
                     "application/json"
@@ -791,6 +796,11 @@ const docTemplate = `{
         },
         "/relation/unfollow": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Unfollow another user",
                 "consumes": [
                     "application/json"
