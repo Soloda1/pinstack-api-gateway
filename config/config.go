@@ -23,9 +23,10 @@ type HTTPServer struct {
 }
 
 type Services struct {
-	User UserService `mapstructure:"user"`
-	Auth AuthService `mapstructure:"auth"`
-	Post PostService `mapstructure:"post"`
+	User     UserService     `mapstructure:"user"`
+	Auth     AuthService     `mapstructure:"auth"`
+	Post     PostService     `mapstructure:"post"`
+	Relation RelationService `mapstructure:"relation"`
 }
 
 type UserService struct {
@@ -39,6 +40,11 @@ type AuthService struct {
 }
 
 type PostService struct {
+	Address string `mapstructure:"address"`
+	Port    int    `mapstructure:"port"`
+}
+
+type RelationService struct {
 	Address string `mapstructure:"address"`
 	Port    int    `mapstructure:"port"`
 }
@@ -69,6 +75,9 @@ func MustLoad() *Config {
 
 	viper.SetDefault("services.auth.address", "post-service")
 	viper.SetDefault("services.auth.port", 50053)
+
+	viper.SetDefault("services.relation.address", "relation-service")
+	viper.SetDefault("services.relation.port", 50054)
 
 	viper.SetDefault("jwt.secret", "my-secret")
 	viper.SetDefault("jwt.access_expires_at", "1m")

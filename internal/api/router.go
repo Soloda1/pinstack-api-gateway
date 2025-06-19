@@ -5,34 +5,38 @@ import (
 	"pinstack-api-gateway/config"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
 	post_client "pinstack-api-gateway/internal/clients/post"
+	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	auth_handler "pinstack-api-gateway/internal/handlers/auth"
 	post_handler "pinstack-api-gateway/internal/handlers/post"
+	relation_handler "pinstack-api-gateway/internal/handlers/relation"
 	user_handler "pinstack-api-gateway/internal/handlers/user"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/middlewares"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Router struct {
-	router     *chi.Mux
-	log        *logger.Logger
-	userClient user_client.UserClient
-	authClient auth_client.AuthClient
-	postClient post_client.PostClient
+	router         *chi.Mux
+	log            *logger.Logger
+	userClient     user_client.UserClient
+	authClient     auth_client.AuthClient
+	postClient     post_client.PostClient
+	relationClient relation_client.RelationClient
 }
 
-func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient) *Router {
+func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient) *Router {
 	return &Router{
-		router:     chi.NewRouter(),
-		log:        log,
-		userClient: userClient,
-		authClient: authClient,
-		postClient: postClient,
+		router:         chi.NewRouter(),
+		log:            log,
+		userClient:     userClient,
+		authClient:     authClient,
+		postClient:     postClient,
+		relationClient: relationClient,
 	}
 }
 
@@ -51,6 +55,7 @@ func (r *Router) Setup(cfg *config.Config) {
 		v1.Mount("/users", r.setupUserRoutes(jwtMiddleware))
 		v1.Mount("/auth", r.setupAuthRoutes(jwtMiddleware))
 		v1.Mount("/posts", r.setupPostRoutes(jwtMiddleware))
+		v1.Mount("/relation", r.setupRelationRoutes(jwtMiddleware))
 	})
 }
 
@@ -102,6 +107,19 @@ func (r *Router) setupPostRoutes(jwtMiddleware func(next http.Handler) http.Hand
 		r.Post("/", postHandler.Create)
 		r.Put("/{id}", postHandler.Update)
 		r.Delete("/{id}", postHandler.Delete)
+	})
+
+	return router
+}
+
+func (r *Router) setupRelationRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
+	relationHandler := relation_handler.NewRelationHandler(r.relationClient, r.log)
+	router := chi.NewRouter()
+
+	router.Group(func(r chi.Router) {
+		r.Use(jwtMiddleware)
+		r.Post("/follow", relationHandler.Follow)
+		r.Post("/unfollow", relationHandler.Unfollow)
 	})
 
 	return router

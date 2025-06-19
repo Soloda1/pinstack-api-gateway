@@ -29,33 +29,42 @@ import (
 	_ "pinstack-api-gateway/docs"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
 	post_client "pinstack-api-gateway/internal/clients/post"
+	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"pinstack-api-gateway/internal/logger"
 	"time"
 )
 
 type APIServer struct {
-	address    string
-	log        *logger.Logger
-	router     *Router
-	server     *http.Server
-	userClient user_client.UserClient
-	authClient auth_client.AuthClient
-	postClient post_client.PostClient
+	address        string
+	log            *logger.Logger
+	router         *Router
+	server         *http.Server
+	userClient     user_client.UserClient
+	authClient     auth_client.AuthClient
+	postClient     post_client.PostClient
+	relationClient relation_client.RelationClient
 }
 
-func NewAPIServer(address string, log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient) *APIServer {
+func NewAPIServer(address string,
+	log *logger.Logger,
+	userClient user_client.UserClient,
+	authClient auth_client.AuthClient,
+	postClient post_client.PostClient,
+	relationClient relation_client.RelationClient,
+) *APIServer {
 	return &APIServer{
-		address:    address,
-		log:        log,
-		userClient: userClient,
-		authClient: authClient,
-		postClient: postClient,
+		address:        address,
+		log:            log,
+		userClient:     userClient,
+		authClient:     authClient,
+		postClient:     postClient,
+		relationClient: relationClient,
 	}
 }
 
 func (s *APIServer) Run(cfg *config.Config) error {
-	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient)
+	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient, s.relationClient)
 	s.router.Setup(cfg)
 
 	s.server = &http.Server{

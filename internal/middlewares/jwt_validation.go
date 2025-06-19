@@ -15,6 +15,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+type claimsKeyType struct{}
+
+var ClaimsKey = claimsKeyType{}
+
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int64 `json:"user_id"`
@@ -73,7 +77,7 @@ func JWTValidationMiddleware(secretKey string, log *logger.Logger) func(next htt
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "claims", claims)
+			ctx := context.WithValue(r.Context(), ClaimsKey, claims)
 			next.ServeHTTP(w, r.WithContext(ctx))
 
 			entry.Info("token validation completed successfully", slog.Int64("user_id", claims.UserID))
@@ -84,7 +88,7 @@ func JWTValidationMiddleware(secretKey string, log *logger.Logger) func(next htt
 }
 
 func GetClaimsFromContext(ctx context.Context) (*Claims, error) {
-	claims, ok := ctx.Value("claims").(*Claims)
+	claims, ok := ctx.Value(ClaimsKey).(*Claims)
 	if !ok {
 		return nil, custom_errors.ErrUnauthenticated
 	}

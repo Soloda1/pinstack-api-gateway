@@ -294,8 +294,6 @@ definitions:
           type: string
         type: array
       title:
-        maxLength: 255
-        minLength: 1
         type: string
     type: object
   post_handler.UpdatePostResponse:
@@ -319,6 +317,30 @@ definitions:
       title:
         type: string
       updated_at:
+        type: string
+    type: object
+  relation_handler.FollowRequest:
+    properties:
+      followee_id:
+        type: integer
+    required:
+    - followee_id
+    type: object
+  relation_handler.FollowResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  relation_handler.UnfollowRequest:
+    properties:
+      followee_id:
+        type: integer
+    required:
+    - followee_id
+    type: object
+  relation_handler.UnfollowResponse:
+    properties:
+      message:
         type: string
     type: object
   user_handler.CreateUserRequest:
@@ -974,6 +996,90 @@ paths:
       summary: List posts with filters
       tags:
       - posts
+  /relation/follow:
+    post:
+      consumes:
+      - application/json
+      description: Follow another user
+      parameters:
+      - description: Follow request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/relation_handler.FollowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Followed successfully
+          schema:
+            $ref: '#/definitions/relation_handler.FollowResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Follow user
+      tags:
+      - relation
+  /relation/unfollow:
+    post:
+      consumes:
+      - application/json
+      description: Unfollow another user
+      parameters:
+      - description: Unfollow request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/relation_handler.UnfollowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unfollowed successfully
+          schema:
+            $ref: '#/definitions/relation_handler.UnfollowResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Unfollow user
+      tags:
+      - relation
   /users:
     post:
       consumes:
