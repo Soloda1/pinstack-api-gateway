@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
 	post_client "pinstack-api-gateway/internal/clients/post"
+	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"syscall"
 	"time"
@@ -63,9 +64,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	relationConn, err := grpc.NewClient(
+		fmt.Sprintf("%s:%d", cfg.Services.Relation.Address, cfg.Services.Relation.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Error("Failed to connect to Relation Service", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 	userClient := user_client.NewUserClient(userConn, log)
 	authClient := auth_client.NewAuthClient(authConn, log)
 	postClient := post_client.NewPostClient(postConn, log)
+	relationClient := relation_client.NewRelationClient(relationConn, log)
 
 	server := api.NewAPIServer(
 		fmt.Sprintf("%s:%d", cfg.HTTPServer.Address, cfg.HTTPServer.Port),
@@ -73,6 +84,7 @@ func main() {
 		userClient,
 		authClient,
 		postClient,
+		relationClient,
 	)
 
 	quit := make(chan os.Signal, 1)
