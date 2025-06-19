@@ -1,3 +1,4 @@
+basePath: /api/v1
 definitions:
   auth_handler.LoginRequest:
     properties:
@@ -515,8 +516,19 @@ definitions:
       username:
         type: string
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API Gateway for Pinstack social media platform
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Pinstack API Gateway
+  version: "1.0"
 paths:
   /auth/login:
     post:
@@ -1459,4 +1471,10 @@ paths:
       summary: Get user by username
       tags:
       - users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
