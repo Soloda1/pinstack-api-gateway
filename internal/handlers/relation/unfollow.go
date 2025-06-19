@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/utils"
 
 	"github.com/go-playground/validator/v10"
@@ -14,7 +15,6 @@ import (
 )
 
 type UnfollowRequest struct {
-	FollowerID int64 `json:"follower_id" validate:"required,gt=0"`
 	FolloweeID int64 `json:"followee_id" validate:"required,gt=0"`
 }
 
@@ -43,16 +43,22 @@ func (h *RelationHandler) Unfollow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	validate := validator.New()
-	if err := validate.Struct(req); err != nil {
+	if err := validate.StructPartial(req, "FolloweeID"); err != nil {
 		h.log.Debug("Failed to validate unfollow request", slog.String("error", err.Error()))
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
 
-	err := h.relationClient.Unfollow(r.Context(), req.FollowerID, req.FolloweeID)
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
+	if err != nil {
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
+		return
+	}
+
+	err = h.relationClient.Unfollow(r.Context(), claims.UserID, req.FolloweeID)
 	if err != nil {
 		h.log.Error("unfollow failed", slog.String("error", err.Error()))
-
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
@@ -66,7 +72,6 @@ func (h *RelationHandler) Unfollow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
