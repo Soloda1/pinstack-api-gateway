@@ -106,3 +106,14 @@ var (
 	ErrMediaAttachFailed = errors.New("failed to attach media to post")
 	ErrMediaDetachFailed = errors.New("failed to detach media from post")
 )
+
+// Follower relation errors
+var (
+	ErrSelfFollow               = errors.New("cannot follow yourself")
+	ErrFollowRelationExists     = errors.New("follow relation already exists")
+	ErrFollowRelationNotFound   = errors.New("follow relation not found")
+	ErrFollowRelationCreateFail = errors.New("failed to create follow relation")
+	ErrFollowRelationDeleteFail = errors.New("failed to delete follow relation")
+	ErrAlreadyFollowing         = errors.New("already following this user")
+	ErrUnexpectedEventType      = errors.New("unexpected event type in outbox")
+)

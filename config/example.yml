@@ -16,6 +16,9 @@ services:
   post:
     address: "post-service"
     port: 50053
+  relation:
+    address: "relation-service"
+    port: 50054
 
 jwt:
   secret: "my-secret"
