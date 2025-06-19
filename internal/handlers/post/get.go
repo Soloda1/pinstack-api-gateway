@@ -7,7 +7,7 @@ import (
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type GetPostRequest struct {

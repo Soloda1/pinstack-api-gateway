@@ -34,7 +34,11 @@ func main() {
 		log.Error("Failed to connect to User Service", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	defer userConn.Close()
+	defer func() {
+		if err := userConn.Close(); err != nil {
+			log.Error("Failed to close User Service connection", slog.String("error", err.Error()))
+		}
+	}()
 
 	authConn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", cfg.Services.Auth.Address, cfg.Services.Auth.Port),
@@ -44,7 +48,11 @@ func main() {
 		log.Error("Failed to connect to Auth Service", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	defer authConn.Close()
+	defer func() {
+		if err := authConn.Close(); err != nil {
+			log.Error("Failed to close Auth Service connection", slog.String("error", err.Error()))
+		}
+	}()
 
 	postConn, err := grpc.NewClient(
 		fmt.Sprintf("%s:%d", cfg.Services.Post.Address, cfg.Services.Post.Port),
