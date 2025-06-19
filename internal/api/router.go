@@ -5,6 +5,7 @@ import (
 	"pinstack-api-gateway/config"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
 	post_client "pinstack-api-gateway/internal/clients/post"
+	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	auth_handler "pinstack-api-gateway/internal/handlers/auth"
 	post_handler "pinstack-api-gateway/internal/handlers/post"
@@ -19,20 +20,22 @@ import (
 )
 
 type Router struct {
-	router     *chi.Mux
-	log        *logger.Logger
-	userClient user_client.UserClient
-	authClient auth_client.AuthClient
-	postClient post_client.PostClient
+	router         *chi.Mux
+	log            *logger.Logger
+	userClient     user_client.UserClient
+	authClient     auth_client.AuthClient
+	postClient     post_client.PostClient
+	relationClient relation_client.RelationClient
 }
 
-func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient) *Router {
+func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient) *Router {
 	return &Router{
-		router:     chi.NewRouter(),
-		log:        log,
-		userClient: userClient,
-		authClient: authClient,
-		postClient: postClient,
+		router:         chi.NewRouter(),
+		log:            log,
+		userClient:     userClient,
+		authClient:     authClient,
+		postClient:     postClient,
+		relationClient: relationClient,
 	}
 }
 
