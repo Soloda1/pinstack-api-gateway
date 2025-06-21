@@ -14,9 +14,9 @@ import (
 )
 
 type SendNotificationRequest struct {
-	UserID  int64  `json:"user_id" validate:"required,gt=0"`
-	Type    string `json:"type" validate:"required"`
-	Payload []byte `json:"payload"`
+	UserID  int64           `json:"user_id" validate:"required,gt=0"`
+	Type    string          `json:"type" validate:"required"`
+	Payload json.RawMessage `json:"payload"`
 }
 
 type SendNotificationResponse struct {
