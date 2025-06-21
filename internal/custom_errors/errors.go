@@ -120,5 +120,10 @@ var (
 
 // Notification errors
 var (
-	ErrNotificationNotFound = errors.New("notification not found")
+	ErrNotificationNotFound       = errors.New("notification not found")
+	ErrNotificationCreateFailed   = errors.New("failed to create notification")
+	ErrNotificationInvalidType    = errors.New("invalid notification type")
+	ErrNotificationInvalidPayload = errors.New("invalid notification payload")
+	ErrNotificationAccessDenied   = errors.New("access to notification denied")
+	ErrNotificationLimitExceeded  = errors.New("notification limit exceeded")
 )
