@@ -126,4 +126,5 @@ var (
 	ErrNotificationInvalidPayload = errors.New("invalid notification payload")
 	ErrNotificationAccessDenied   = errors.New("access to notification denied")
 	ErrNotificationLimitExceeded  = errors.New("notification limit exceeded")
+	ErrNotificationAlreadyExists  = errors.New("notification already exists")
 )

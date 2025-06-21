@@ -2,14 +2,15 @@ package notification_client
 
 import (
 	"context"
-	pb "github.com/soloda1/pinstack-proto-definitions/gen/go/pinstack-proto-definitions/notification/v1"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"log/slog"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
+
+	pb "github.com/soloda1/pinstack-proto-definitions/gen/go/pinstack-proto-definitions/notification/v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type notificationClient struct {
@@ -39,6 +40,26 @@ func (c *notificationClient) SendNotification(ctx context.Context, userID int64,
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return 0, custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return 0, custom_errors.ErrUserNotFound
+			case codes.PermissionDenied:
+				return 0, custom_errors.ErrInsufficientRights
+			case codes.ResourceExhausted:
+				return 0, custom_errors.ErrNotificationLimitExceeded
+			case codes.AlreadyExists:
+				return 0, custom_errors.ErrNotificationAlreadyExists // Исправлено с ErrAlreadyFollowing
+			case codes.Unavailable:
+				return 0, custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return 0, custom_errors.ErrExternalServiceTimeout
+			case codes.Unimplemented:
+				return 0, custom_errors.ErrNotificationInvalidType
+			case codes.Canceled:
+				return 0, custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return 0, custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
+				return 0, custom_errors.ErrValidationFailed
 			default:
 				return 0, custom_errors.ErrExternalServiceError
 			}
@@ -63,6 +84,20 @@ func (c *notificationClient) GetNotificationDetails(ctx context.Context, notific
 			case codes.NotFound:
 				return nil, custom_errors.ErrNotificationNotFound
 			case codes.InvalidArgument:
+				return nil, custom_errors.ErrValidationFailed
+			case codes.PermissionDenied:
+				return nil, custom_errors.ErrNotificationAccessDenied
+			case codes.Unavailable:
+				return nil, custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return nil, custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return nil, custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return nil, custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return nil, custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
 				return nil, custom_errors.ErrValidationFailed
 			default:
 				return nil, custom_errors.ErrExternalServiceError
@@ -89,6 +124,22 @@ func (c *notificationClient) GetUserNotificationFeed(ctx context.Context, userID
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return nil, 0, custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return nil, 0, custom_errors.ErrUserNotFound
+			case codes.PermissionDenied:
+				return nil, 0, custom_errors.ErrInsufficientRights
+			case codes.Unavailable:
+				return nil, 0, custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return nil, 0, custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return nil, 0, custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return nil, 0, custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return nil, 0, custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
+				return nil, 0, custom_errors.ErrInvalidInput
 			default:
 				return nil, 0, custom_errors.ErrExternalServiceError
 			}
@@ -119,6 +170,24 @@ func (c *notificationClient) ReadNotification(ctx context.Context, notificationI
 				return custom_errors.ErrNotificationNotFound
 			case codes.InvalidArgument:
 				return custom_errors.ErrValidationFailed
+			case codes.PermissionDenied:
+				return custom_errors.ErrNotificationAccessDenied
+			case codes.AlreadyExists:
+				return nil
+			case codes.Unavailable:
+				return custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
+				return custom_errors.ErrValidationFailed
+			case codes.Unimplemented:
+				return custom_errors.ErrExternalServiceError
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -142,6 +211,24 @@ func (c *notificationClient) ReadAllUserNotifications(ctx context.Context, userI
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
+			case codes.PermissionDenied:
+				return custom_errors.ErrInsufficientRights
+			case codes.Unavailable:
+				return custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
+				return custom_errors.ErrValidationFailed
+			case codes.FailedPrecondition:
+				return custom_errors.ErrOperationNotAllowed
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -167,6 +254,22 @@ func (c *notificationClient) RemoveNotification(ctx context.Context, notificatio
 				return custom_errors.ErrNotificationNotFound
 			case codes.InvalidArgument:
 				return custom_errors.ErrValidationFailed
+			case codes.PermissionDenied:
+				return custom_errors.ErrNotificationAccessDenied
+			case codes.Unavailable:
+				return custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
+				return custom_errors.ErrValidationFailed
+			case codes.FailedPrecondition:
+				return custom_errors.ErrOperationNotAllowed
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -189,6 +292,22 @@ func (c *notificationClient) GetUnreadCount(ctx context.Context, userID int64) (
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
+				return 0, custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return 0, custom_errors.ErrUserNotFound
+			case codes.PermissionDenied:
+				return 0, custom_errors.ErrInsufficientRights
+			case codes.Unavailable:
+				return 0, custom_errors.ErrExternalServiceUnavailable
+			case codes.DeadlineExceeded:
+				return 0, custom_errors.ErrExternalServiceTimeout
+			case codes.ResourceExhausted:
+				return 0, custom_errors.ErrRateLimitExceeded
+			case codes.Canceled:
+				return 0, custom_errors.ErrExternalServiceError
+			case codes.Aborted:
+				return 0, custom_errors.ErrExternalServiceError
+			case codes.OutOfRange:
 				return 0, custom_errors.ErrValidationFailed
 			default:
 				return 0, custom_errors.ErrExternalServiceError

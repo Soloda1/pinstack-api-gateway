@@ -65,10 +65,22 @@ func (h *NotificationHandler) SendNotification(w http.ResponseWriter, r *http.Re
 				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 				return
 			case codes.ResourceExhausted:
-				utils.SendError(w, http.StatusTooManyRequests, custom_errors.ErrRateLimitExceeded.Error())
+				utils.SendError(w, http.StatusTooManyRequests, custom_errors.ErrNotificationLimitExceeded.Error())
 				return
 			case codes.PermissionDenied:
 				utils.SendError(w, http.StatusForbidden, custom_errors.ErrInsufficientRights.Error())
+				return
+			case codes.AlreadyExists:
+				utils.SendError(w, http.StatusConflict, "Notification already exists")
+				return
+			case codes.Unavailable:
+				utils.SendError(w, http.StatusServiceUnavailable, custom_errors.ErrExternalServiceUnavailable.Error())
+				return
+			case codes.DeadlineExceeded:
+				utils.SendError(w, http.StatusGatewayTimeout, custom_errors.ErrExternalServiceTimeout.Error())
+				return
+			case codes.Unimplemented:
+				utils.SendError(w, http.StatusNotImplemented, "Notification type not implemented")
 				return
 			case codes.Internal:
 				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
