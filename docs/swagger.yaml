@@ -85,6 +85,82 @@ definitions:
       message:
         type: string
     type: object
+  models.NotificationSwagger:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_read:
+        type: boolean
+      payload: {}
+      type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  notification_handler.GetUnreadCountResponse:
+    properties:
+      count:
+        type: integer
+    type: object
+  notification_handler.GetUserNotificationFeedSwaggerResponse:
+    properties:
+      limit:
+        type: integer
+      notifications:
+        items:
+          $ref: '#/definitions/models.NotificationSwagger'
+        type: array
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  notification_handler.ReadAllUserNotificationsResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  notification_handler.ReadNotificationResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  notification_handler.RemoveNotificationResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  notification_handler.SendNotificationRequest:
+    properties:
+      payload:
+        items:
+          type: integer
+        type: array
+      type:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - type
+    - user_id
+    type: object
+  notification_handler.SendNotificationResponse:
+    properties:
+      message:
+        type: string
+      notification_id:
+        type: integer
+    type: object
   post_handler.CreatePostRequest:
     properties:
       content:
@@ -758,6 +834,331 @@ paths:
       summary: Update user password
       tags:
       - auth
+  /notification/{notification_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a notification by ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: notification_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification removed successfully
+          schema:
+            $ref: '#/definitions/notification_handler.RemoveNotificationResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Notification not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remove notification
+      tags:
+      - notification
+    get:
+      consumes:
+      - application/json
+      description: Get notification details by ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: notification_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification details
+          schema:
+            $ref: '#/definitions/models.NotificationSwagger'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Notification not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get notification details
+      tags:
+      - notification
+  /notification/{notification_id}/read:
+    put:
+      consumes:
+      - application/json
+      description: Mark a notification as read
+      parameters:
+      - description: Notification ID
+        in: path
+        name: notification_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification marked as read
+          schema:
+            $ref: '#/definitions/notification_handler.ReadNotificationResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Notification not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark notification as read
+      tags:
+      - notification
+  /notification/feed/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get paginated list of notifications for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User notification feed
+          schema:
+            $ref: '#/definitions/notification_handler.GetUserNotificationFeedSwaggerResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user notification feed
+      tags:
+      - notification
+  /notification/read-all/{user_id}:
+    put:
+      consumes:
+      - application/json
+      description: Mark all notifications of a user as read
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: All notifications marked as read
+          schema:
+            $ref: '#/definitions/notification_handler.ReadAllUserNotificationsResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark all user notifications as read
+      tags:
+      - notification
+  /notification/send:
+    post:
+      consumes:
+      - application/json
+      description: Send notification to a user
+      parameters:
+      - description: Send notification request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/notification_handler.SendNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification sent successfully
+          schema:
+            $ref: '#/definitions/notification_handler.SendNotificationResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Notification limit exceeded
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Send notification
+      tags:
+      - notification
+  /notification/unread-count/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Get the count of unread notifications for a user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unread notification count
+          schema:
+            $ref: '#/definitions/notification_handler.GetUnreadCountResponse'
+        "400":
+          description: Bad request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get unread notification count
+      tags:
+      - notification
   /posts:
     post:
       consumes:
