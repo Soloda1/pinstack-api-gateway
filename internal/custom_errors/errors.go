@@ -117,3 +117,8 @@ var (
 	ErrAlreadyFollowing         = errors.New("already following this user")
 	ErrUnexpectedEventType      = errors.New("unexpected event type in outbox")
 )
+
+// Notification errors
+var (
+	ErrNotificationNotFound = errors.New("notification not found")
+)
