@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
+	notification_client "pinstack-api-gateway/internal/clients/notification"
 	post_client "pinstack-api-gateway/internal/clients/post"
 	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
@@ -77,6 +78,7 @@ func main() {
 	authClient := auth_client.NewAuthClient(authConn, log)
 	postClient := post_client.NewPostClient(postConn, log)
 	relationClient := relation_client.NewRelationClient(relationConn, log)
+	notificationClient := notification_client.NewNotificationClient(userConn, log)
 
 	server := api.NewAPIServer(
 		fmt.Sprintf("%s:%d", cfg.HTTPServer.Address, cfg.HTTPServer.Port),
@@ -85,6 +87,7 @@ func main() {
 		authClient,
 		postClient,
 		relationClient,
+		notificationClient,
 	)
 
 	quit := make(chan os.Signal, 1)
