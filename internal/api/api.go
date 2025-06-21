@@ -28,6 +28,7 @@ import (
 	"pinstack-api-gateway/config"
 	_ "pinstack-api-gateway/docs"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
+	notification_client "pinstack-api-gateway/internal/clients/notification"
 	post_client "pinstack-api-gateway/internal/clients/post"
 	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
@@ -36,14 +37,15 @@ import (
 )
 
 type APIServer struct {
-	address        string
-	log            *logger.Logger
-	router         *Router
-	server         *http.Server
-	userClient     user_client.UserClient
-	authClient     auth_client.AuthClient
-	postClient     post_client.PostClient
-	relationClient relation_client.RelationClient
+	address            string
+	log                *logger.Logger
+	router             *Router
+	server             *http.Server
+	userClient         user_client.UserClient
+	authClient         auth_client.AuthClient
+	postClient         post_client.PostClient
+	relationClient     relation_client.RelationClient
+	notificationClient notification_client.NotificationClient
 }
 
 func NewAPIServer(address string,
@@ -52,19 +54,21 @@ func NewAPIServer(address string,
 	authClient auth_client.AuthClient,
 	postClient post_client.PostClient,
 	relationClient relation_client.RelationClient,
+	notificationClient notification_client.NotificationClient,
 ) *APIServer {
 	return &APIServer{
-		address:        address,
-		log:            log,
-		userClient:     userClient,
-		authClient:     authClient,
-		postClient:     postClient,
-		relationClient: relationClient,
+		address:            address,
+		log:                log,
+		userClient:         userClient,
+		authClient:         authClient,
+		postClient:         postClient,
+		relationClient:     relationClient,
+		notificationClient: notificationClient,
 	}
 }
 
 func (s *APIServer) Run(cfg *config.Config) error {
-	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient, s.relationClient)
+	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient, s.relationClient, s.notificationClient)
 	s.router.Setup(cfg)
 
 	s.server = &http.Server{

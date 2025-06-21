@@ -4,10 +4,12 @@ import (
 	"net/http"
 	"pinstack-api-gateway/config"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
+	notification_client "pinstack-api-gateway/internal/clients/notification"
 	post_client "pinstack-api-gateway/internal/clients/post"
 	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	auth_handler "pinstack-api-gateway/internal/handlers/auth"
+	notification_handler "pinstack-api-gateway/internal/handlers/notification"
 	post_handler "pinstack-api-gateway/internal/handlers/post"
 	relation_handler "pinstack-api-gateway/internal/handlers/relation"
 	user_handler "pinstack-api-gateway/internal/handlers/user"
@@ -21,22 +23,24 @@ import (
 )
 
 type Router struct {
-	router         *chi.Mux
-	log            *logger.Logger
-	userClient     user_client.UserClient
-	authClient     auth_client.AuthClient
-	postClient     post_client.PostClient
-	relationClient relation_client.RelationClient
+	router             *chi.Mux
+	log                *logger.Logger
+	userClient         user_client.UserClient
+	authClient         auth_client.AuthClient
+	postClient         post_client.PostClient
+	relationClient     relation_client.RelationClient
+	notificationClient notification_client.NotificationClient
 }
 
-func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient) *Router {
+func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient, notificationClient notification_client.NotificationClient) *Router {
 	return &Router{
-		router:         chi.NewRouter(),
-		log:            log,
-		userClient:     userClient,
-		authClient:     authClient,
-		postClient:     postClient,
-		relationClient: relationClient,
+		router:             chi.NewRouter(),
+		log:                log,
+		userClient:         userClient,
+		authClient:         authClient,
+		postClient:         postClient,
+		relationClient:     relationClient,
+		notificationClient: notificationClient,
 	}
 }
 
@@ -56,6 +60,7 @@ func (r *Router) Setup(cfg *config.Config) {
 		v1.Mount("/auth", r.setupAuthRoutes(jwtMiddleware))
 		v1.Mount("/posts", r.setupPostRoutes(jwtMiddleware))
 		v1.Mount("/relation", r.setupRelationRoutes(jwtMiddleware))
+		v1.Mount("/notifications", r.setupNotificationRoutes(jwtMiddleware))
 	})
 }
 
@@ -120,6 +125,24 @@ func (r *Router) setupRelationRoutes(jwtMiddleware func(next http.Handler) http.
 		r.Use(jwtMiddleware)
 		r.Post("/follow", relationHandler.Follow)
 		r.Post("/unfollow", relationHandler.Unfollow)
+	})
+
+	return router
+}
+
+func (r *Router) setupNotificationRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
+	notificationHandler := notification_handler.NewNotificationHandler(r.notificationClient, r.log)
+	router := chi.NewRouter()
+
+	router.Group(func(r chi.Router) {
+		r.Use(jwtMiddleware)
+		r.Get("/{notification_id}", notificationHandler.GetNotificationDetails)
+		r.Get("/feed/{user_id}", notificationHandler.GetUserNotificationFeed)
+		r.Get("/unread-count/{user_id}", notificationHandler.GetUnreadCount)
+		r.Put("/{notification_id}/read", notificationHandler.ReadNotification)
+		r.Put("/read-all/{user_id}", notificationHandler.ReadAllUserNotifications)
+		r.Delete("/{notification_id}", notificationHandler.RemoveNotification)
+		r.Post("/send", notificationHandler.SendNotification)
 	})
 
 	return router
