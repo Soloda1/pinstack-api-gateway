@@ -7,6 +7,19 @@ import (
 	"time"
 )
 
+// EventType used to swagger documentation and represents the type of event for a notification.
+type EventType string
+
+// NotificationSwagger represents the structure of a notification for Swagger documentation.
+type NotificationSwagger struct {
+	ID        int64     `json:"id"`
+	UserID    int64     `json:"user_id"`
+	Type      EventType `json:"type"`
+	IsRead    bool      `json:"is_read"`
+	CreatedAt time.Time `json:"created_at"`
+	Payload   any       `json:"payload,omitempty"`
+}
+
 type Notification struct {
 	ID        int64            `json:"id" db:"id"`
 	UserID    int64            `json:"user_id" db:"user_id"`

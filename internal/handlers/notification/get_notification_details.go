@@ -22,7 +22,7 @@ import (
 // @Produce json
 // @Security BearerAuth
 // @Param notification_id path int true "Notification ID"
-// @Success 200 {object} models.Notification "Notification details"
+// @Success 200 {object} models.NotificationSwagger "Notification details"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 404 {object} map[string]string "Notification not found"

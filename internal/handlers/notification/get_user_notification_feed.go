@@ -14,6 +14,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// GetUserNotificationFeedSwaggerResponse is the Swagger response structure for GetUserNotificationFeed
+type GetUserNotificationFeedSwaggerResponse struct {
+	Notifications []*models.NotificationSwagger `json:"notifications"`
+	Total         int                           `json:"total"`
+	Page          int                           `json:"page"`
+	Limit         int                           `json:"limit"`
+	TotalPages    int                           `json:"total_pages"`
+}
+
 type GetUserNotificationFeedResponse struct {
 	Notifications []*models.Notification `json:"notifications"`
 	Total         int                    `json:"total"`
@@ -32,7 +41,7 @@ type GetUserNotificationFeedResponse struct {
 // @Param user_id path int true "User ID"
 // @Param page query int false "Page number (default: 1)"
 // @Param limit query int false "Items per page (default: 10)"
-// @Success 200 {object} GetUserNotificationFeedResponse "User notification feed"
+// @Success 200 {object} GetUserNotificationFeedSwaggerResponse "User notification feed"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 500 {object} map[string]string "Internal server error"
