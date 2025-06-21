@@ -74,11 +74,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	notificationConn, err := grpc.NewClient(
+		fmt.Sprintf("%s:%d", cfg.Services.Notification.Address, cfg.Services.Notification.Port),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Error("Failed to connect to Notification Service", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
 	userClient := user_client.NewUserClient(userConn, log)
 	authClient := auth_client.NewAuthClient(authConn, log)
 	postClient := post_client.NewPostClient(postConn, log)
 	relationClient := relation_client.NewRelationClient(relationConn, log)
-	notificationClient := notification_client.NewNotificationClient(userConn, log)
+	notificationClient := notification_client.NewNotificationClient(notificationConn, log)
 
 	server := api.NewAPIServer(
 		fmt.Sprintf("%s:%d", cfg.HTTPServer.Address, cfg.HTTPServer.Port),

@@ -19,6 +19,9 @@ services:
   relation:
     address: "relation-service"
     port: 50054
+  notification:
+    address: "notification-service"
+    port: 50055
 
 jwt:
   secret: "my-secret"

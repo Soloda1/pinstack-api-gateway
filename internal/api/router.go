@@ -60,7 +60,7 @@ func (r *Router) Setup(cfg *config.Config) {
 		v1.Mount("/auth", r.setupAuthRoutes(jwtMiddleware))
 		v1.Mount("/posts", r.setupPostRoutes(jwtMiddleware))
 		v1.Mount("/relation", r.setupRelationRoutes(jwtMiddleware))
-		v1.Mount("/notifications", r.setupNotificationRoutes(jwtMiddleware))
+		v1.Mount("/notification", r.setupNotificationRoutes(jwtMiddleware))
 	})
 }
 
