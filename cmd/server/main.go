@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	auth_client "pinstack-api-gateway/internal/clients/auth"
@@ -99,16 +102,33 @@ func main() {
 		notificationClient,
 	)
 
+	metricsAddr := fmt.Sprintf("%s:%d", cfg.Prometheus.Address, cfg.Prometheus.Port)
+	metricsServer := &http.Server{
+		Addr:    metricsAddr,
+		Handler: nil,
+	}
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	done := make(chan bool, 1)
+	metricsDone := make(chan bool, 1)
 
 	go func() {
 		if err := server.Run(cfg); err != nil {
 			log.Error("Server error", slog.String("error", err.Error()))
 		}
 		done <- true
+	}()
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		log.Info("Starting Prometheus metrics server", slog.String("address", metricsAddr))
+		if err := metricsServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("Prometheus metrics server error", slog.String("error", err.Error()))
+		}
+		metricsDone <- true
 	}()
 
 	<-quit
@@ -121,6 +141,12 @@ func main() {
 		log.Error("Server shutdown error", slog.String("error", err.Error()))
 	}
 
+	if err := metricsServer.Shutdown(shutdownCtx); err != nil {
+		log.Error("Metrics server shutdown error", slog.String("error", err.Error()))
+	}
+
 	<-done
+	<-metricsDone
+
 	log.Info("Server exited")
 }

@@ -28,5 +28,6 @@ jwt:
   access_expires_at: "1m"
   refresh_expires_at: "5m"
 
-
-
+prometheus:
+  address: "0.0.0.0"
+  port: 9106

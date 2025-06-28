@@ -13,6 +13,7 @@ type Config struct {
 	HTTPServer HTTPServer `mapstructure:"http_server"`
 	Services   Services   `mapstructure:"services"`
 	JWT        JWT        `mapstructure:"jwt"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
 type HTTPServer struct {
@@ -61,6 +62,11 @@ type JWT struct {
 	RefreshExpiresAt string `mapstructure:"refresh_expires_at"`
 }
 
+type Prometheus struct {
+	Address string `mapstructure:"address"`
+	Port    int    `mapstructure:"port"`
+}
+
 func MustLoad() *Config {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -91,6 +97,9 @@ func MustLoad() *Config {
 	viper.SetDefault("jwt.secret", "my-secret")
 	viper.SetDefault("jwt.access_expires_at", "1m")
 	viper.SetDefault("jwt.refresh_expires_at", "5m")
+
+	viper.SetDefault("prometheus.address", "0.0.0.0")
+	viper.SetDefault("prometheus.port", 9106)
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file: %s", err)
