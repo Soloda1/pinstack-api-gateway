@@ -52,7 +52,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to models struct
 	modelReq := &models.LoginRequest{
 		Login:    req.Login,
 		Password: req.Password,

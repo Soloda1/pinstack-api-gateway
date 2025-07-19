@@ -2,6 +2,7 @@ package user_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/models"
@@ -68,16 +69,16 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, err := h.userClient.CreateUser(r.Context(), user)
 	if err != nil {
-		switch err {
-		case custom_errors.ErrUsernameExists:
+		switch {
+		case errors.Is(err, custom_errors.ErrUsernameExists):
 			utils.SendError(w, http.StatusConflict, err.Error())
-		case custom_errors.ErrEmailExists:
+		case errors.Is(err, custom_errors.ErrEmailExists):
 			utils.SendError(w, http.StatusConflict, err.Error())
-		case custom_errors.ErrInvalidUsername:
+		case errors.Is(err, custom_errors.ErrInvalidUsername):
 			utils.SendError(w, http.StatusBadRequest, err.Error())
-		case custom_errors.ErrInvalidEmail:
+		case errors.Is(err, custom_errors.ErrInvalidEmail):
 			utils.SendError(w, http.StatusBadRequest, err.Error())
-		case custom_errors.ErrInvalidPassword:
+		case errors.Is(err, custom_errors.ErrInvalidPassword):
 			utils.SendError(w, http.StatusBadRequest, err.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

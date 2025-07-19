@@ -1,6 +1,7 @@
 package user_handler
 
 import (
+	"errors"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
@@ -56,10 +57,10 @@ func (h *UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 
 	users, total, err := h.userClient.SearchUsers(r.Context(), query, page, limit)
 	if err != nil {
-		switch err {
-		case custom_errors.ErrInvalidSearchQuery:
+		switch {
+		case errors.Is(err, custom_errors.ErrInvalidSearchQuery):
 			utils.SendError(w, http.StatusBadRequest, err.Error())
-		case custom_errors.ErrSearchFailed:
+		case errors.Is(err, custom_errors.ErrSearchFailed):
 			utils.SendError(w, http.StatusInternalServerError, err.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

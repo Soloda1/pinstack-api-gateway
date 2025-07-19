@@ -38,13 +38,14 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
 		return
 	}
-	claimsRaw := r.Context().Value("claims")
-	claims, ok := claimsRaw.(*middlewares.Claims)
-	if !ok || claims == nil {
-		h.log.Error("invalid token claims")
-		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidToken.Error())
+
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
+	if err != nil {
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}
+
 	err = h.postClient.DeletePost(r.Context(), claims.UserID, id)
 	if err != nil {
 		h.log.Error("delete post failed", slog.String("error", err.Error()))
