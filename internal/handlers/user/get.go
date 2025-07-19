@@ -1,6 +1,7 @@
 package user_handler
 
 import (
+	"errors"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
@@ -42,8 +43,8 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userClient.GetUser(r.Context(), id)
 	if err != nil {
-		switch err {
-		case custom_errors.ErrUserNotFound:
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, err.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

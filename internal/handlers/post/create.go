@@ -75,11 +75,10 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claimsRaw := r.Context().Value("claims")
-	claims, ok := claimsRaw.(*middlewares.Claims)
-	if !ok || claims == nil {
-		h.log.Error("invalid token claims")
-		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidToken.Error())
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
+	if err != nil {
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}
 

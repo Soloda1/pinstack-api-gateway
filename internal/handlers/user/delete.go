@@ -1,6 +1,7 @@
 package user_handler
 
 import (
+	"errors"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
@@ -31,8 +32,8 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = h.userClient.GetUser(r.Context(), id)
 	if err != nil {
-		switch err {
-		case custom_errors.ErrUserNotFound:
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, err.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
@@ -42,10 +43,10 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	err = h.userClient.DeleteUser(r.Context(), id)
 	if err != nil {
-		switch err {
-		case custom_errors.ErrUserNotFound:
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, err.Error())
-		case custom_errors.ErrOperationNotAllowed:
+		case errors.Is(err, custom_errors.ErrOperationNotAllowed):
 			utils.SendError(w, http.StatusForbidden, err.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

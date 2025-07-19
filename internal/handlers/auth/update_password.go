@@ -2,6 +2,7 @@ package auth_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -59,7 +60,6 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to models struct
 	modelReq := &models.UpdatePasswordRequest{
 		ID:          claims.UserID,
 		OldPassword: req.OldPassword,
@@ -69,14 +69,14 @@ func (h *AuthHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	err = h.authClient.UpdatePassword(r.Context(), modelReq)
 	if err != nil {
 		h.log.Error("update password failed", slog.String("error", err.Error()))
-		switch err {
-		case custom_errors.ErrInvalidPassword:
+		switch {
+		case errors.Is(err, custom_errors.ErrInvalidPassword):
 			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidPassword.Error())
-		case custom_errors.ErrInvalidCredentials:
+		case errors.Is(err, custom_errors.ErrInvalidCredentials):
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidCredentials.Error())
-		case custom_errors.ErrUserNotFound:
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-		case custom_errors.ErrOperationNotAllowed:
+		case errors.Is(err, custom_errors.ErrOperationNotAllowed):
 			utils.SendError(w, http.StatusForbidden, custom_errors.ErrOperationNotAllowed.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

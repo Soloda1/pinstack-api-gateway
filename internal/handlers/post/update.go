@@ -71,10 +71,9 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claimsRaw := r.Context().Value("claims")
-	claims, ok := claimsRaw.(*middlewares.Claims)
-	if !ok {
-		h.log.Debug("No claims found in context")
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
+	if err != nil {
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
 		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}

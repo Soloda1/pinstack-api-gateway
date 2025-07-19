@@ -2,6 +2,7 @@ package auth_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -72,14 +73,14 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		switch err {
-		case custom_errors.ErrInvalidRefreshToken:
+		switch {
+		case errors.Is(err, custom_errors.ErrInvalidRefreshToken):
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrInvalidRefreshToken.Error())
-		case custom_errors.ErrTokenExpired:
+		case errors.Is(err, custom_errors.ErrTokenExpired):
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrTokenExpired.Error())
-		case custom_errors.ErrUnauthenticated:
+		case errors.Is(err, custom_errors.ErrUnauthenticated):
 			utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
-		case custom_errors.ErrUserNotFound:
+		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
@@ -87,7 +88,6 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// В конце функции заменить:
 	response := RefreshTokenResponse{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
