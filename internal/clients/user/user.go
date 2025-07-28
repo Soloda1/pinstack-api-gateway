@@ -2,6 +2,7 @@ package user_client
 
 import (
 	"context"
+	"log/slog"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
@@ -41,11 +42,14 @@ func (c *userClient) GetUser(ctx context.Context, id int64) (*models.User, error
 }
 
 func (c *userClient) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
-	c.log.Info("Creating new user", "username", user.Username, "email", user.Email)
+	c.log.Info("Creating new user", slog.String("username", user.Username), slog.String("fullname", *user.FullName))
 	resp, err := c.client.CreateUser(ctx, &pb.CreateUserRequest{
-		Username: user.Username,
-		Email:    user.Email,
-		Password: user.Password,
+		Username:  user.Username,
+		Email:     user.Email,
+		Password:  user.Password,
+		FullName:  user.FullName,
+		Bio:       user.Bio,
+		AvatarUrl: user.AvatarURL,
 	})
 	if err != nil {
 		c.log.Error("Failed to create user", "username", user.Username, "error", err)
@@ -71,7 +75,7 @@ func (c *userClient) CreateUser(ctx context.Context, user *models.User) (*models
 		}
 		return nil, custom_errors.ErrExternalServiceError
 	}
-	c.log.Info("Successfully created user", "id", resp.Id)
+	c.log.Info("Successfully created user", slog.String("username", user.Username), slog.String("fullname", *user.FullName))
 	return models.UserFromProto(resp), nil
 }
 

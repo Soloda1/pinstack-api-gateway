@@ -3,6 +3,7 @@ package user_handler
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/models"
@@ -66,6 +67,8 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		Bio:       req.Bio,
 		AvatarURL: req.AvatarURL,
 	}
+
+	h.log.Debug("Creating new user", slog.String("username", user.Username), slog.String("fullname", *user.FullName))
 
 	createdUser, err := h.userClient.CreateUser(r.Context(), user)
 	if err != nil {
