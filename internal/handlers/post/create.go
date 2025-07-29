@@ -23,7 +23,7 @@ type CreatePostRequest struct {
 type MediaItemInput struct {
 	URL      string `json:"url" validate:"required,url,max=512"`
 	Type     string `json:"type" validate:"required,oneof=image video"`
-	Position int32  `json:"position" validate:"gte=0,lte=100"`
+	Position int32  `json:"position" validate:"gte=1,lte=9"`
 }
 
 type CreatePostResponse struct {
@@ -81,6 +81,7 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}
+	h.log.Debug("requested model", slog.Any("model", req))
 
 	validate := validator.New()
 	if err := validate.Struct(req); err != nil {
@@ -88,7 +89,6 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
-	h.log.Debug("requested model", slog.Any("model", req))
 
 	modelReq := &models.CreatePostDTO{
 		AuthorID: claims.UserID,
@@ -106,6 +106,8 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
+
+	h.log.Debug("creating post", slog.Any("model", modelReq))
 
 	post, err := h.postClient.CreatePost(r.Context(), modelReq)
 	if err != nil {
