@@ -142,9 +142,15 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
-			h.log.Error("get user failed", slog.String("error", err.Error()))
-			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-			return
+			h.log.Warn("author not found, using placeholder data", slog.Int64("authorID", post.Post.AuthorID))
+			author = &models.User{
+				ID:        0,
+				Username:  "unknown",
+				FullName:  utils.StringPtr("Unknown Author"),
+				AvatarURL: utils.StringPtr("http://unknown.unknown"),
+				Email:     "unknown@unknown.com",
+				Bio:       utils.StringPtr("Unknown Author BIO"),
+			}
 		default:
 			h.log.Error("Failed to get user", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

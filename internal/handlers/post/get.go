@@ -108,7 +108,6 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 				FullName:  utils.StringPtr("Unknown Author"),
 				AvatarURL: utils.StringPtr("http://unknown.unknown"),
 			}
-			return
 		default:
 			h.log.Error("Failed to get user", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

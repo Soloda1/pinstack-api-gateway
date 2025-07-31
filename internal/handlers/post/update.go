@@ -156,7 +156,6 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 				FullName:  utils.StringPtr("Unknown Author"),
 				AvatarURL: utils.StringPtr("http://unknown.unknown"),
 			}
-			break
 		default:
 			h.log.Error("Failed to get user", slog.Int64("id", updatedPost.Post.AuthorID), slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
@@ -164,11 +163,13 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	resp.Author = &UpdatePostAuthor{
-		ID:        author.ID,
-		Username:  author.Username,
-		FullName:  author.FullName,
-		AvatarURL: author.AvatarURL,
+	if author != nil {
+		resp.Author = &UpdatePostAuthor{
+			ID:        author.ID,
+			Username:  author.Username,
+			FullName:  author.FullName,
+			AvatarURL: author.AvatarURL,
+		}
 	}
 
 	if len(updatedPost.Media) > 0 {
