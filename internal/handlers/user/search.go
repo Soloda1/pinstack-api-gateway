@@ -29,7 +29,6 @@ type UserResponse struct {
 // @Description Search users by query string
 // @Tags users
 // @Produce json
-// @Security BearerAuth
 // @Param query query string true "Search query"
 // @Param page query int false "Page number"
 // @Param limit query int false "Results per page (max 100)"

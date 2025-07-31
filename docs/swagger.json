@@ -1536,11 +1536,6 @@
         },
         "/users/email/{email}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by email",
                 "produces": [
                     "application/json"
@@ -1606,11 +1601,6 @@
         },
         "/users/search": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Search users by query string",
                 "produces": [
                     "application/json"
@@ -1679,11 +1669,6 @@
         },
         "/users/username/{username}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by username",
                 "produces": [
                     "application/json"
@@ -1749,11 +1734,6 @@
         },
         "/users/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by user ID",
                 "produces": [
                     "application/json"

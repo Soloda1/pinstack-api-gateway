@@ -1542,11 +1542,6 @@ const docTemplate = `{
         },
         "/users/email/{email}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by email",
                 "produces": [
                     "application/json"
@@ -1612,11 +1607,6 @@ const docTemplate = `{
         },
         "/users/search": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Search users by query string",
                 "produces": [
                     "application/json"
@@ -1685,11 +1675,6 @@ const docTemplate = `{
         },
         "/users/username/{username}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by username",
                 "produces": [
                     "application/json"
@@ -1755,11 +1740,6 @@ const docTemplate = `{
         },
         "/users/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get user information by user ID",
                 "produces": [
                     "application/json"

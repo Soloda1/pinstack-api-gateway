@@ -1663,8 +1663,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Get user by ID
       tags:
       - users
@@ -1765,8 +1763,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Get user by email
       tags:
       - users
@@ -1812,8 +1808,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Search users
       tags:
       - users
@@ -1857,8 +1851,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Get user by username
       tags:
       - users

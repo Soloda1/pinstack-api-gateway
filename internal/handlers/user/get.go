@@ -26,7 +26,6 @@ type GetUserResponse struct {
 // @Description Get user information by user ID
 // @Tags users
 // @Produce json
-// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} GetUserResponse "User information"
 // @Failure 400 {object} map[string]string "Bad request"

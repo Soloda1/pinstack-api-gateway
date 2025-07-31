@@ -25,7 +25,6 @@ type GetUserByEmailResponse struct {
 // @Description Get user information by email
 // @Tags users
 // @Produce json
-// @Security BearerAuth
 // @Param email path string true "User email"
 // @Success 200 {object} GetUserByEmailResponse "User information"
 // @Failure 400 {object} map[string]string "Bad request"
