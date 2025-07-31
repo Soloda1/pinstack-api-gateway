@@ -112,9 +112,14 @@ func (c *postClient) DeletePost(ctx context.Context, userID int64, id int64) err
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.NotFound:
+				c.log.Debug("Post not found", slog.Int64("id", id), slog.String("error", err.Error()))
 				return custom_errors.ErrPostNotFound
 			case codes.InvalidArgument:
+				c.log.Debug("Post validation error", slog.Int64("id", id), slog.String("error", err.Error()))
 				return custom_errors.ErrPostValidation
+			case codes.PermissionDenied:
+				c.log.Debug("Permission denied", slog.Int64("id", id), slog.String("error", err.Error()))
+				return custom_errors.ErrForbidden
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
