@@ -174,6 +174,7 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+
 		item.Author = &ListPostAuthor{
 			ID:        author.ID,
 			Username:  author.Username,

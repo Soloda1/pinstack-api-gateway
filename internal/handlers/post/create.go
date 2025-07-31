@@ -165,12 +165,14 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		AuthorID:  post.Post.AuthorID,
 	}
+
 	resp.AuthorID = author.ID
 	resp.AuthorEmail = author.Email
 	resp.AuthorAvatarURL = author.AvatarURL
 	resp.AuthorBio = author.Bio
 	resp.AuthorFullName = author.FullName
 	resp.AuthorUsername = author.Username
+
 	if len(post.Media) > 0 {
 		resp.Media = make([]PostMediaResponse, len(post.Media))
 		for i, m := range post.Media {

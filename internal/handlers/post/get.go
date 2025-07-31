@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 
@@ -102,7 +103,7 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			h.log.Warn("Author not found for post", slog.Int64("author_id", post.Post.AuthorID))
-			resp.Author = &GetPostUser{
+			author = &models.User{
 				ID:        0,
 				Username:  "unknown",
 				FullName:  utils.StringPtr("Unknown Author"),

@@ -150,7 +150,7 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			h.log.Warn("Author not found, setting author to null", slog.Int64("authorID", updatedPost.Post.AuthorID))
-			resp.Author = &UpdatePostAuthor{
+			author = &models.User{
 				ID:        0,
 				Username:  "unknown",
 				FullName:  utils.StringPtr("Unknown Author"),
@@ -163,13 +163,11 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if author != nil {
-		resp.Author = &UpdatePostAuthor{
-			ID:        author.ID,
-			Username:  author.Username,
-			FullName:  author.FullName,
-			AvatarURL: author.AvatarURL,
-		}
+	resp.Author = &UpdatePostAuthor{
+		ID:        author.ID,
+		Username:  author.Username,
+		FullName:  author.FullName,
+		AvatarURL: author.AvatarURL,
 	}
 
 	if len(updatedPost.Media) > 0 {
