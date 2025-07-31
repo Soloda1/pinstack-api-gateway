@@ -33,7 +33,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if id < 1 {
-		h.log.Debug("Wrong targed id", slog.Int64("id", id))
+		h.log.Debug("Wrong target id", slog.Int64("id", id))
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
@@ -47,7 +47,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	if id != claims.UserID {
 		h.log.Debug("User id does not match", slog.Int64("target id", id), slog.Int64("auth id", claims.UserID))
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrForbidden.Error())
+		utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
 		return
 	}
 
