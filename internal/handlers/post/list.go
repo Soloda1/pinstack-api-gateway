@@ -1,6 +1,7 @@
 package post_handler
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -126,7 +127,7 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 		filters.Limit = limit
 	}
 
-	posts, err := h.postClient.ListPosts(r.Context(), &filters)
+	posts, total, err := h.postClient.ListPosts(r.Context(), &filters)
 	if err != nil {
 		h.log.Error("list posts failed", slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
@@ -145,7 +146,7 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	resp := ListPostsResponse{
 		Posts: make([]ListPostItem, len(posts)),
-		Total: int64(len(posts)),
+		Total: total,
 	}
 	for i, p := range posts {
 		item := ListPostItem{
@@ -155,14 +156,27 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 			CreatedAt: p.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 			UpdatedAt: p.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		}
-		if p.Author != nil {
-			item.Author = &ListPostAuthor{
-				ID:        p.Author.ID,
-				Username:  p.Author.Username,
-				FullName:  p.Author.FullName,
-				AvatarURL: p.Author.AvatarURL,
+
+		author, err := h.userClient.GetUser(r.Context(), p.Post.AuthorID)
+		if err != nil {
+			switch {
+			case errors.Is(err, custom_errors.ErrUserNotFound):
+				h.log.Warn("author not found, using placeholder", slog.Int64("authorID", p.Post.AuthorID))
+				author = utils.GenerateUnknownAuthor()
+			default:
+				h.log.Error("Failed to get user", slog.Int64("id", p.Post.AuthorID), slog.String("error", err.Error()))
+				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+				return
 			}
 		}
+
+		item.Author = &ListPostAuthor{
+			ID:        author.ID,
+			Username:  author.Username,
+			FullName:  author.FullName,
+			AvatarURL: author.AvatarURL,
+		}
+
 		if len(p.Media) > 0 {
 			item.Media = make([]PostMediaResponse, len(p.Media))
 			for j, m := range p.Media {
@@ -174,6 +188,7 @@ func (h *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+
 		if len(p.Tags) > 0 {
 			item.Tags = make([]TagResponse, len(p.Tags))
 			for k, t := range p.Tags {

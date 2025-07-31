@@ -64,7 +64,7 @@ func (c *postClient) GetPostByID(ctx context.Context, id int64) (*models.PostDet
 	return models.PostDetailedFromProto(resp), nil
 }
 
-func (c *postClient) ListPosts(ctx context.Context, filters *models.PostFilters) ([]*models.PostDetailed, error) {
+func (c *postClient) ListPosts(ctx context.Context, filters *models.PostFilters) ([]*models.PostDetailed, int64, error) {
 	c.log.Info("Listing posts", slog.Any("filters", filters))
 	req := models.PostFiltersToProto(filters)
 	resp, err := c.client.ListPosts(ctx, req)
@@ -72,16 +72,16 @@ func (c *postClient) ListPosts(ctx context.Context, filters *models.PostFilters)
 		c.log.Error("Failed to list posts", slog.String("error", err.Error()))
 		if st, ok := status.FromError(err); ok {
 			if st.Code() == codes.InvalidArgument {
-				return nil, custom_errors.ErrPostValidation
+				return nil, 0, custom_errors.ErrPostValidation
 			}
 		}
-		return nil, custom_errors.ErrExternalServiceError
+		return nil, 0, custom_errors.ErrExternalServiceError
 	}
 	posts := make([]*models.PostDetailed, 0, len(resp.Posts))
 	for _, p := range resp.Posts {
 		posts = append(posts, models.PostDetailedFromProto(p))
 	}
-	return posts, nil
+	return posts, resp.Total, nil
 }
 
 func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.UpdatePostDTO) error {
@@ -95,6 +95,8 @@ func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.Upda
 				return custom_errors.ErrPostNotFound
 			case codes.InvalidArgument:
 				return custom_errors.ErrPostValidation
+			case codes.PermissionDenied:
+				return custom_errors.ErrForbidden
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -112,9 +114,14 @@ func (c *postClient) DeletePost(ctx context.Context, userID int64, id int64) err
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.NotFound:
+				c.log.Debug("Post not found", slog.Int64("id", id), slog.String("error", err.Error()))
 				return custom_errors.ErrPostNotFound
 			case codes.InvalidArgument:
+				c.log.Debug("Post validation error", slog.Int64("id", id), slog.String("error", err.Error()))
 				return custom_errors.ErrPostValidation
+			case codes.PermissionDenied:
+				c.log.Debug("Permission denied", slog.Int64("id", id), slog.String("error", err.Error()))
+				return custom_errors.ErrForbidden
 			default:
 				return custom_errors.ErrExternalServiceError
 			}

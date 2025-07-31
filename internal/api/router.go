@@ -102,7 +102,7 @@ func (r *Router) setupAuthRoutes(jwtMiddleware func(next http.Handler) http.Hand
 }
 
 func (r *Router) setupPostRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
-	postHandler := post_handler.NewPostHandler(r.postClient, r.log)
+	postHandler := post_handler.NewPostHandler(r.postClient, r.userClient, r.log)
 	router := chi.NewRouter()
 
 	router.Get("/list", postHandler.List)
