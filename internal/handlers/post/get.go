@@ -88,25 +88,32 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	author, err := h.userClient.GetUser(r.Context(), post.Post.AuthorID)
-	if err != nil {
-		switch {
-		case errors.Is(err, custom_errors.ErrUserNotFound):
-			h.log.Error("get user failed", slog.String("error", err.Error()))
-			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-			return
-		default:
-			h.log.Error("Failed to get user", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
-			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-			return
-		}
-	}
+
 	resp := &GetPostResponse{
 		ID:        post.Post.ID,
 		Title:     post.Post.Title,
 		Content:   post.Post.Content,
 		CreatedAt: post.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt: post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+	}
+
+	author, err := h.userClient.GetUser(r.Context(), post.Post.AuthorID)
+	if err != nil {
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
+			h.log.Warn("Author not found for post", slog.Int64("author_id", post.Post.AuthorID))
+			resp.Author = &GetPostUser{
+				ID:        0,
+				Username:  "unknown",
+				FullName:  utils.StringPtr("Unknown Author"),
+				AvatarURL: utils.StringPtr("http://unknown.unknown"),
+			}
+			return
+		default:
+			h.log.Error("Failed to get user", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
+		}
 	}
 
 	resp.Author = &GetPostUser{

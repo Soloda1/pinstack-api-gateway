@@ -149,9 +149,14 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
-			h.log.Error("get user failed", slog.String("error", err.Error()))
-			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-			return
+			h.log.Warn("Author not found, setting author to null", slog.Int64("authorID", updatedPost.Post.AuthorID))
+			resp.Author = &UpdatePostAuthor{
+				ID:        0,
+				Username:  "unknown",
+				FullName:  utils.StringPtr("Unknown Author"),
+				AvatarURL: utils.StringPtr("http://unknown.unknown"),
+			}
+			break
 		default:
 			h.log.Error("Failed to get user", slog.Int64("id", updatedPost.Post.AuthorID), slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
