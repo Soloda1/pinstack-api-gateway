@@ -34,10 +34,12 @@ type GetUserByEmailResponse struct {
 // @Router /users/email/{email} [get]
 func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	email := chi.URLParam(r, "email")
-	if email == "" {
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+	if email == "" || len(email) == 0 || !utils.IsValidEmail(email) {
+		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
+
+	h.log.Debug("Getting user by email", "email", email)
 
 	user, err := h.userClient.GetUserByEmail(r.Context(), email)
 	if err != nil {

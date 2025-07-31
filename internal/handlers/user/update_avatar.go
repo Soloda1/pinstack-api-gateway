@@ -3,13 +3,12 @@ package user_handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/go-playground/validator/v10"
+	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/utils"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
 )
 
 type UpdateAvatarRequest struct {
@@ -23,7 +22,6 @@ type UpdateAvatarRequest struct {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "User ID"
 // @Param request body UpdateAvatarRequest true "Avatar update data"
 // @Success 200 {object} nil "Avatar updated successfully"
 // @Failure 400 {object} map[string]string "Bad request"
@@ -31,11 +29,12 @@ type UpdateAvatarRequest struct {
 // @Failure 403 {object} map[string]string "Operation not allowed"
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /users/{id}/avatar [put]
+// @Router /users/avatar [put]
 func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
 	if err != nil {
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}
 
@@ -51,7 +50,7 @@ func (h *UserHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.userClient.UpdateAvatar(r.Context(), id, req.AvatarURL)
+	err = h.userClient.UpdateAvatar(r.Context(), claims.UserID, req.AvatarURL)
 	if err != nil {
 		switch {
 		case errors.Is(err, custom_errors.ErrUserNotFound):
