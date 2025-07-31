@@ -95,6 +95,8 @@ func (c *postClient) UpdatePost(ctx context.Context, id int64, post *models.Upda
 				return custom_errors.ErrPostNotFound
 			case codes.InvalidArgument:
 				return custom_errors.ErrPostValidation
+			case codes.PermissionDenied:
+				return custom_errors.ErrForbidden
 			default:
 				return custom_errors.ErrExternalServiceError
 			}

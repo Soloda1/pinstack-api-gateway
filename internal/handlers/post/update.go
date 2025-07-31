@@ -2,6 +2,7 @@ package post_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -12,8 +13,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type UpdatePostRequest struct {
@@ -111,27 +110,25 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err = h.postClient.UpdatePost(r.Context(), id, modelReq)
 	if err != nil {
-		h.log.Error("update post failed", slog.String("error", err.Error()))
-
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.InvalidArgument:
-				utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
-				return
-			case codes.NotFound:
-				utils.SendError(w, http.StatusNotFound, custom_errors.ErrPostNotFound.Error())
-				return
-			case codes.PermissionDenied:
-				utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
-				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-				return
-			}
+		h.log.Error("Update post failed", slog.String("error", err.Error()))
+		switch {
+		case errors.Is(err, custom_errors.ErrPostNotFound):
+			h.log.Debug("Post not found", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrPostNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrForbidden):
+			h.log.Debug("Forbidden", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
+			return
+		case errors.Is(err, custom_errors.ErrPostValidation):
+			h.log.Debug("Post validation failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrPostValidation.Error())
+			return
+		default:
+			h.log.Error("Update post failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
 		}
-
-		utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-		return
 	}
 
 	updatedPost, err := h.postClient.GetPostByID(r.Context(), id)
@@ -148,14 +145,27 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: updatedPost.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt: updatedPost.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
-	if updatedPost.Author != nil {
-		resp.Author = &UpdatePostAuthor{
-			ID:        updatedPost.Author.ID,
-			Username:  updatedPost.Author.Username,
-			FullName:  updatedPost.Author.FullName,
-			AvatarURL: updatedPost.Author.AvatarURL,
+	author, err := h.userClient.GetUser(r.Context(), updatedPost.Post.AuthorID)
+	if err != nil {
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
+			h.log.Error("get user failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+			return
+		default:
+			h.log.Error("Failed to get user", slog.Int64("id", updatedPost.Post.AuthorID), slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
 		}
 	}
+
+	resp.Author = &UpdatePostAuthor{
+		ID:        author.ID,
+		Username:  author.Username,
+		FullName:  author.FullName,
+		AvatarURL: author.AvatarURL,
+	}
+
 	if len(updatedPost.Media) > 0 {
 		resp.Media = make([]PostMediaResponse, len(updatedPost.Media))
 		for i, m := range updatedPost.Media {
