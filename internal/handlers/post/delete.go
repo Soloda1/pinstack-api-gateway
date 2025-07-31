@@ -65,6 +65,7 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		default:
 			h.log.Error("delete post failed", slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
 		}
 	}
 	utils.Send(w, http.StatusOK, nil)

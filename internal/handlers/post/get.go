@@ -82,7 +82,7 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrPostValidation.Error())
 			return
 		default:
-			h.log.Error("Failed to get post", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
+			h.log.Error("Failed to get post", slog.Int64("id", id), slog.String("error", err.Error()))
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
 			return
 		}

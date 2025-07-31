@@ -114,7 +114,7 @@ func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, custom_errors.ErrPostNotFound):
 			h.log.Debug("Post not found", slog.String("error", err.Error()))
-			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrPostNotFound.Error())
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrPostNotFound.Error())
 			return
 		case errors.Is(err, custom_errors.ErrForbidden):
 			h.log.Debug("Forbidden", slog.String("error", err.Error()))

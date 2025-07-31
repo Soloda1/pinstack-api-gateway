@@ -12,10 +12,10 @@ type PostHandler struct {
 	log        *logger.Logger
 }
 
-func NewPostHandler(postClient post_client.PostClient, userCLient user_client.UserClient, log *logger.Logger) *PostHandler {
+func NewPostHandler(postClient post_client.PostClient, userClient user_client.UserClient, log *logger.Logger) *PostHandler {
 	return &PostHandler{
 		postClient: postClient,
-		userClient: userCLient,
+		userClient: userClient,
 		log:        log,
 	}
 }
