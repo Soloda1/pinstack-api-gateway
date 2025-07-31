@@ -2,6 +2,7 @@ package post_handler
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -137,7 +138,19 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.log.Debug("created post", slog.Any("post", post))
-
+	author, err := h.userClient.GetUser(r.Context(), post.Post.AuthorID)
+	if err != nil {
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
+			h.log.Error("get user failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+			return
+		default:
+			h.log.Error("Failed to get user", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
+		}
+	}
 	resp := CreatePostResponse{
 		ID:        post.Post.ID,
 		Title:     post.Post.Title,
@@ -146,6 +159,12 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		AuthorID:  post.Post.AuthorID,
 	}
+	resp.AuthorID = author.ID
+	resp.AuthorEmail = author.Email
+	resp.AuthorAvatarURL = author.AvatarURL
+	resp.AuthorBio = author.Bio
+	resp.AuthorFullName = author.FullName
+	resp.AuthorUsername = author.Username
 	if len(post.Media) > 0 {
 		resp.Media = make([]PostMediaResponse, len(post.Media))
 		for i, m := range post.Media {
