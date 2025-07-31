@@ -2,18 +2,18 @@ package user_handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 )
 
 type UpdateUserRequest struct {
-	ID       int64   `json:"id" validate:"required"`
+	ID       int64   `json:"id" validate:"required,min=1"`
 	Username *string `json:"username,omitempty" validate:"omitempty,min=3,max=32"`
 	Email    *string `json:"email,omitempty" validate:"omitempty,email"`
 	FullName *string `json:"full_name,omitempty" validate:"omitempty,max=100"`
@@ -38,25 +38,20 @@ type UpdateUserResponse struct {
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "User ID"
 // @Param request body UpdateUserRequest true "User update data"
 // @Success 200 {object} UpdateUserResponse "User updated successfully"
 // @Failure 400 {object} map[string]string "Bad request"
 // @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 403 {object} map[string]string "Operation not allowed"
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 409 {object} map[string]string "Username or email already exists"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /users/{id} [put]
+// @Router /users [put]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
 	if err != nil {
-		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
-		return
-	}
-
-	currentUser, err := h.userClient.GetUser(r.Context(), id)
-	if err != nil {
-		utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
 		return
 	}
 
@@ -66,16 +61,26 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.ID = id
-
 	validate := validator.New()
 	if err := validate.Struct(req); err != nil {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
 
+	if req.ID != claims.UserID {
+		h.log.Debug("User id does not match", slog.Int64("target id", req.ID), slog.Int64("auth id", claims.UserID))
+		utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
+		return
+	}
+
+	currentUser, err := h.userClient.GetUser(r.Context(), req.ID)
+	if err != nil {
+		utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		return
+	}
+
 	updateUser := &models.User{
-		ID:       id,
+		ID:       req.ID,
 		Username: currentUser.Username,
 		Email:    currentUser.Email,
 		FullName: currentUser.FullName,
