@@ -1,6 +1,7 @@
 package post_handler
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
@@ -71,9 +72,35 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	post, err := h.postClient.GetPostByID(r.Context(), id)
 	if err != nil {
-		h.log.Error("get post failed", slog.String("error", err.Error()))
-		utils.SendError(w, http.StatusNotFound, custom_errors.ErrPostNotFound.Error())
-		return
+		switch {
+		case errors.Is(err, custom_errors.ErrPostNotFound):
+			h.log.Debug("get post failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrPostNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrPostValidation):
+			h.log.Debug("post validation failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrPostValidation.Error())
+			return
+		default:
+			h.log.Error("Failed to get post", slog.Int64("id", post.Post.AuthorID), slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
+		}
+
+	}
+	author, err := h.userClient.GetUser(r.Context(), post.Post.AuthorID)
+	if err != nil {
+		switch {
+		case errors.Is(err, custom_errors.ErrUserNotFound):
+			h.log.Error("get user failed", slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+			return
+		default:
+			h.log.Error("Failed to get user", slog.Int64("id", id), slog.String("error", err.Error()))
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
+		}
+
 	}
 	resp := &GetPostResponse{
 		ID:        post.Post.ID,
@@ -82,14 +109,14 @@ func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: post.Post.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt: post.Post.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
-	if post.Author != nil {
-		resp.Author = &GetPostUser{
-			ID:        post.Author.ID,
-			Username:  post.Author.Username,
-			FullName:  post.Author.FullName,
-			AvatarURL: post.Author.AvatarURL,
-		}
+
+	resp.Author = &GetPostUser{
+		ID:        author.ID,
+		Username:  author.Username,
+		FullName:  author.FullName,
+		AvatarURL: author.AvatarURL,
 	}
+
 	if post.Media != nil {
 		media := make([]*GetPostMedia, 0, len(post.Media))
 		for _, m := range post.Media {
