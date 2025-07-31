@@ -78,7 +78,7 @@ func (r *Router) setupUserRoutes(jwtMiddleware func(next http.Handler) http.Hand
 		r.Post("/", userHandler.CreateUser)
 		r.Put("/", userHandler.UpdateUser)
 		r.Delete("/{id}", userHandler.DeleteUser)
-		r.Put("/{id}/avatar", userHandler.UpdateAvatar)
+		r.Put("/avatar", userHandler.UpdateAvatar)
 	})
 
 	return router

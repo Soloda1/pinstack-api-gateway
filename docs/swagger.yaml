@@ -1666,17 +1666,12 @@ paths:
       summary: Get user by ID
       tags:
       - users
-  /users/{id}/avatar:
+  /users/avatar:
     put:
       consumes:
       - application/json
       description: Update the avatar URL for a user
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: string
       - description: Avatar update data
         in: body
         name: request

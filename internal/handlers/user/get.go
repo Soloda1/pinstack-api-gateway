@@ -2,6 +2,7 @@ package user_handler
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
@@ -37,6 +38,12 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+		return
+	}
+
+	if id < 1 {
+		h.log.Debug("Wrong target id", slog.Int64("id", id))
+		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 		return
 	}
 

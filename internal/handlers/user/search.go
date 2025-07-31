@@ -39,7 +39,7 @@ type UserResponse struct {
 // @Router /users/search [get]
 func (h *UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
-	if query == "" {
+	if query == "" || len(query) < 1 {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidSearchQuery.Error())
 		return
 	}
@@ -53,6 +53,8 @@ func (h *UserHandler) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil || limit < 1 || limit > 100 {
 		limit = 10
 	}
+
+	h.log.Debug("Searching users", "query", query, "page", page, "limit", limit)
 
 	users, total, err := h.userClient.SearchUsers(r.Context(), query, page, limit)
 	if err != nil {
