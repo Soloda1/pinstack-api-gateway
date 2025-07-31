@@ -2,8 +2,10 @@ package user_handler
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 
@@ -27,6 +29,25 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrInvalidInput.Error())
+		return
+	}
+
+	if id < 1 {
+		h.log.Debug("Wrong targed id", slog.Int64("id", id))
+		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+		return
+	}
+
+	claims, err := middlewares.GetClaimsFromContext(r.Context())
+	if err != nil {
+		h.log.Debug("No user claims in context", slog.String("error", err.Error()))
+		utils.SendError(w, http.StatusUnauthorized, custom_errors.ErrUnauthenticated.Error())
+		return
+	}
+
+	if id != claims.UserID {
+		h.log.Debug("User id does not match", slog.Int64("target id", id), slog.Int64("auth id", claims.UserID))
+		utils.SendError(w, http.StatusBadRequest, custom_errors.ErrForbidden.Error())
 		return
 	}
 

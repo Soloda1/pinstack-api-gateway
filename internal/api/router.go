@@ -76,7 +76,7 @@ func (r *Router) setupUserRoutes(jwtMiddleware func(next http.Handler) http.Hand
 	router.Group(func(r chi.Router) {
 		r.Use(jwtMiddleware)
 		r.Post("/", userHandler.CreateUser)
-		r.Put("/{id}", userHandler.UpdateUser)
+		r.Put("/", userHandler.UpdateUser)
 		r.Delete("/{id}", userHandler.DeleteUser)
 		r.Put("/{id}/avatar", userHandler.UpdateAvatar)
 	})
