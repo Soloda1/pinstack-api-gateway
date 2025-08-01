@@ -373,7 +373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/feed/{user_id}": {
+        "/notification/feed": {
             "get": {
                 "security": [
                     {
@@ -392,13 +392,6 @@ const docTemplate = `{
                 ],
                 "summary": "Get user notification feed",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Page number (default: 1)",
@@ -421,15 +414,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

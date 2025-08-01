@@ -367,7 +367,7 @@
                 }
             }
         },
-        "/notification/feed/{user_id}": {
+        "/notification/feed": {
             "get": {
                 "security": [
                     {
@@ -386,13 +386,6 @@
                 ],
                 "summary": "Get user notification feed",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Page number (default: 1)",
@@ -415,15 +408,6 @@
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
