@@ -212,7 +212,7 @@ func (c *notificationClient) ReadAllUserNotifications(ctx context.Context, userI
 			case codes.InvalidArgument:
 				return custom_errors.ErrValidationFailed
 			case codes.NotFound:
-				return custom_errors.ErrUserNotFound
+				return custom_errors.ErrNotificationNotFound
 			case codes.PermissionDenied:
 				return custom_errors.ErrInsufficientRights
 			case codes.Unavailable:
