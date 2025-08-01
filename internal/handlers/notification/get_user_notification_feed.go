@@ -102,7 +102,7 @@ func (h *NotificationHandler) GetUserNotificationFeed(w http.ResponseWriter, r *
 		return
 	}
 
-	h.log.Debug("notifications from client", slog.Any("notifications", notifications), slog.String("total", string(total)))
+	h.log.Debug("notifications from client", slog.Int("notifications_count", len(notifications)), slog.Int("total", int(total)))
 
 	var totalPages int32
 	if total%limit == 0 {
@@ -119,7 +119,13 @@ func (h *NotificationHandler) GetUserNotificationFeed(w http.ResponseWriter, r *
 		TotalPages:    int(totalPages),
 	}
 
-	h.log.Debug("Get user notification feed response", slog.Any("response", response))
+	h.log.Debug("Get user notification feed response",
+		slog.Int("notifications_count", len(response.Notifications)),
+		slog.Int("total", response.Total),
+		slog.Int("page", response.Page),
+		slog.Int("limit", response.Limit),
+		slog.Int("total_pages", response.TotalPages),
+	)
 
 	utils.Send(w, http.StatusOK, response)
 }
