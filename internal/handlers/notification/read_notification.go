@@ -10,8 +10,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type ReadNotificationResponse struct {
@@ -29,6 +27,7 @@ type ReadNotificationResponse struct {
 // @Param notification_id path int true "Notification ID"
 // @Success 200 {object} ReadNotificationResponse "Notification marked as read"
 // @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 403 {object} map[string]string "Forbidden"
 // @Failure 404 {object} map[string]string "Notification not found"
 // @Failure 500 {object} map[string]string "Internal server error"
@@ -52,20 +51,16 @@ func (h *NotificationHandler) ReadNotification(w http.ResponseWriter, r *http.Re
 	notification, err := h.notificationClient.GetNotificationDetails(r.Context(), notificationID)
 	if err != nil {
 		h.log.Error("Failed to get notification details for read", slog.Int64("notification_id", notificationID), slog.String("error", err.Error()))
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.NotFound:
-				utils.SendError(w, http.StatusNotFound, custom_errors.ErrNotificationNotFound.Error())
-				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-				return
-			}
-		}
 
 		switch {
 		case errors.Is(err, custom_errors.ErrNotificationNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrNotificationNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrValidationFailed):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+			return
+		case errors.Is(err, custom_errors.ErrNotificationAccessDenied):
+			utils.SendError(w, http.StatusForbidden, custom_errors.ErrNotificationAccessDenied.Error())
 			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
@@ -95,22 +90,24 @@ func (h *NotificationHandler) ReadNotification(w http.ResponseWriter, r *http.Re
 	err = h.notificationClient.ReadNotification(r.Context(), notificationID)
 	if err != nil {
 		h.log.Error("Failed to mark notification as read", slog.Int64("notification_id", notificationID), slog.String("error", err.Error()))
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.NotFound:
-				utils.SendError(w, http.StatusNotFound, custom_errors.ErrNotificationNotFound.Error())
-				return
-			case codes.PermissionDenied:
-				utils.SendError(w, http.StatusForbidden, custom_errors.ErrInsufficientRights.Error())
-				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-				return
-			}
-		}
 
-		utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-		return
+		switch {
+		case errors.Is(err, custom_errors.ErrNotificationNotFound):
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrNotificationNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrValidationFailed):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+			return
+		case errors.Is(err, custom_errors.ErrNotificationAccessDenied):
+			utils.SendError(w, http.StatusForbidden, custom_errors.ErrNotificationAccessDenied.Error())
+			return
+		case errors.Is(err, custom_errors.ErrExternalServiceTimeout):
+			utils.SendError(w, http.StatusGatewayTimeout, custom_errors.ErrExternalServiceTimeout.Error())
+			return
+		default:
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
+		}
 	}
 
 	response := ReadNotificationResponse{
