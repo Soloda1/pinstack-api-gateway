@@ -1427,8 +1427,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Get user followees
       tags:
       - relation
@@ -1484,8 +1482,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      security:
-      - BearerAuth: []
       summary: Get user followers
       tags:
       - relation
@@ -1514,8 +1510,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Already following
           schema:
             additionalProperties:
               type: string
@@ -1556,8 +1564,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
-          description: User not found
+          description: User not found or relation not found
           schema:
             additionalProperties:
               type: string

@@ -1244,8 +1244,26 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
                         "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Already following",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1310,8 +1328,17 @@ const docTemplate = `{
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "404": {
-                        "description": "User not found",
+                        "description": "User not found or relation not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1333,11 +1360,6 @@ const docTemplate = `{
         },
         "/relation/{user_id}/followees": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get list of users that the user is following",
                 "consumes": [
                     "application/json"
@@ -1420,11 +1442,6 @@ const docTemplate = `{
         },
         "/relation/{user_id}/followers": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Get list of user followers by user ID",
                 "consumes": [
                     "application/json"
