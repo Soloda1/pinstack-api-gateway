@@ -80,7 +80,7 @@ func (h *NotificationHandler) SendNotification(w http.ResponseWriter, r *http.Re
 				utils.SendError(w, http.StatusGatewayTimeout, custom_errors.ErrExternalServiceTimeout.Error())
 				return
 			case codes.Unimplemented:
-				utils.SendError(w, http.StatusNotImplemented, "Notification type not implemented")
+				utils.SendError(w, http.StatusNotImplemented, custom_errors.ErrNotificationInvalidType.Error())
 				return
 			case codes.Internal:
 				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
