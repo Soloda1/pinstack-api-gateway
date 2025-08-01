@@ -367,7 +367,7 @@
                 }
             }
         },
-        "/notification/feed/{user_id}": {
+        "/notification/feed": {
             "get": {
                 "security": [
                     {
@@ -386,13 +386,6 @@
                 ],
                 "summary": "Get user notification feed",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Page number (default: 1)",
@@ -422,15 +415,6 @@
                             }
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
@@ -443,7 +427,7 @@
                 }
             }
         },
-        "/notification/read-all/{user_id}": {
+        "/notification/read-all": {
             "put": {
                 "security": [
                     {
@@ -461,15 +445,6 @@
                     "notification"
                 ],
                 "summary": "Mark all user notifications as read",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "All notifications marked as read",
@@ -477,26 +452,8 @@
                             "$ref": "#/definitions/notification_handler.ReadAllUserNotificationsResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
                     "404": {
-                        "description": "User not found",
+                        "description": "Notification not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -591,7 +548,7 @@
                 }
             }
         },
-        "/notification/unread-count/{user_id}": {
+        "/notification/unread-count": {
             "get": {
                 "security": [
                     {
@@ -609,15 +566,6 @@
                     "notification"
                 ],
                 "summary": "Get unread notification count",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Unread notification count",
@@ -627,15 +575,6 @@
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -835,6 +774,15 @@
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

@@ -47,7 +47,7 @@ func (c *notificationClient) SendNotification(ctx context.Context, userID int64,
 			case codes.ResourceExhausted:
 				return 0, custom_errors.ErrNotificationLimitExceeded
 			case codes.AlreadyExists:
-				return 0, custom_errors.ErrNotificationAlreadyExists // Исправлено с ErrAlreadyFollowing
+				return 0, custom_errors.ErrNotificationAlreadyExists
 			case codes.Unavailable:
 				return 0, custom_errors.ErrExternalServiceUnavailable
 			case codes.DeadlineExceeded:
@@ -212,7 +212,7 @@ func (c *notificationClient) ReadAllUserNotifications(ctx context.Context, userI
 			case codes.InvalidArgument:
 				return custom_errors.ErrValidationFailed
 			case codes.NotFound:
-				return custom_errors.ErrUserNotFound
+				return custom_errors.ErrNotificationNotFound
 			case codes.PermissionDenied:
 				return custom_errors.ErrInsufficientRights
 			case codes.Unavailable:

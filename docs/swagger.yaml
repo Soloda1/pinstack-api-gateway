@@ -940,6 +940,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -963,17 +969,12 @@ paths:
       summary: Mark notification as read
       tags:
       - notification
-  /notification/feed/{user_id}:
+  /notification/feed:
     get:
       consumes:
       - application/json
       description: Get paginated list of notifications for a user
       parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
       - description: 'Page number (default: 1)'
         in: query
         name: page
@@ -995,12 +996,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "500":
           description: Internal server error
           schema:
@@ -1012,17 +1007,11 @@ paths:
       summary: Get user notification feed
       tags:
       - notification
-  /notification/read-all/{user_id}:
+  /notification/read-all:
     put:
       consumes:
       - application/json
       description: Mark all notifications of a user as read
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -1030,20 +1019,8 @@ paths:
           description: All notifications marked as read
           schema:
             $ref: '#/definitions/notification_handler.ReadAllUserNotificationsResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "404":
-          description: User not found
+          description: Notification not found
           schema:
             additionalProperties:
               type: string
@@ -1107,17 +1084,11 @@ paths:
       summary: Send notification
       tags:
       - notification
-  /notification/unread-count/{user_id}:
+  /notification/unread-count:
     get:
       consumes:
       - application/json
       description: Get the count of unread notifications for a user
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -1127,12 +1098,6 @@ paths:
             $ref: '#/definitions/notification_handler.GetUnreadCountResponse'
         "400":
           description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Forbidden
           schema:
             additionalProperties:
               type: string

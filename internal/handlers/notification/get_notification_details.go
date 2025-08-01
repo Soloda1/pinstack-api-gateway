@@ -52,6 +52,9 @@ func (h *NotificationHandler) GetNotificationDetails(w http.ResponseWriter, r *h
 			case codes.NotFound:
 				utils.SendError(w, http.StatusNotFound, custom_errors.ErrNotificationNotFound.Error())
 				return
+			case codes.InvalidArgument:
+				utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+				return
 			case codes.PermissionDenied:
 				utils.SendError(w, http.StatusForbidden, custom_errors.ErrInsufficientRights.Error())
 				return
@@ -67,6 +70,9 @@ func (h *NotificationHandler) GetNotificationDetails(w http.ResponseWriter, r *h
 			return
 		case errors.Is(err, custom_errors.ErrNotificationAccessDenied):
 			utils.SendError(w, http.StatusForbidden, custom_errors.ErrNotificationAccessDenied.Error())
+			return
+		case errors.Is(err, custom_errors.ErrValidationFailed):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
 			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())

@@ -373,7 +373,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/feed/{user_id}": {
+        "/notification/feed": {
             "get": {
                 "security": [
                     {
@@ -392,13 +392,6 @@ const docTemplate = `{
                 ],
                 "summary": "Get user notification feed",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Page number (default: 1)",
@@ -428,15 +421,6 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
@@ -449,7 +433,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/read-all/{user_id}": {
+        "/notification/read-all": {
             "put": {
                 "security": [
                     {
@@ -467,15 +451,6 @@ const docTemplate = `{
                     "notification"
                 ],
                 "summary": "Mark all user notifications as read",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "All notifications marked as read",
@@ -483,26 +458,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/notification_handler.ReadAllUserNotificationsResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
                     "404": {
-                        "description": "User not found",
+                        "description": "Notification not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -597,7 +554,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/unread-count/{user_id}": {
+        "/notification/unread-count": {
             "get": {
                 "security": [
                     {
@@ -615,15 +572,6 @@ const docTemplate = `{
                     "notification"
                 ],
                 "summary": "Get unread notification count",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Unread notification count",
@@ -633,15 +581,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -841,6 +780,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

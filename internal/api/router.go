@@ -137,10 +137,10 @@ func (r *Router) setupNotificationRoutes(jwtMiddleware func(next http.Handler) h
 	router.Group(func(r chi.Router) {
 		r.Use(jwtMiddleware)
 		r.Get("/{notification_id}", notificationHandler.GetNotificationDetails)
-		r.Get("/feed/{user_id}", notificationHandler.GetUserNotificationFeed)
-		r.Get("/unread-count/{user_id}", notificationHandler.GetUnreadCount)
+		r.Get("/feed", notificationHandler.GetUserNotificationFeed)
+		r.Get("/unread-count", notificationHandler.GetUnreadCount)
 		r.Put("/{notification_id}/read", notificationHandler.ReadNotification)
-		r.Put("/read-all/{user_id}", notificationHandler.ReadAllUserNotifications)
+		r.Put("/read-all", notificationHandler.ReadAllUserNotifications)
 		r.Delete("/{notification_id}", notificationHandler.RemoveNotification)
 		r.Post("/send", notificationHandler.SendNotification)
 	})
