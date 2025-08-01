@@ -22,7 +22,6 @@ type GetFolloweesResponse struct {
 // @Tags relation
 // @Accept json
 // @Produce json
-// @Security BearerAuth
 // @Param user_id path int true "User ID"
 // @Param limit query int false "Limit for pagination" default(20)
 // @Param page query int false "Page number" default(1)
@@ -74,6 +73,9 @@ func (h *RelationHandler) GetFollowees(w http.ResponseWriter, r *http.Request) {
 			return
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrDatabaseQuery):
+			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrDatabaseQuery.Error())
 			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
