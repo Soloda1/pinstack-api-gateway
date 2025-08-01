@@ -1107,17 +1107,11 @@ paths:
       summary: Send notification
       tags:
       - notification
-  /notification/unread-count/{user_id}:
+  /notification/unread-count:
     get:
       consumes:
       - application/json
       description: Get the count of unread notifications for a user
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -1127,12 +1121,6 @@ paths:
             $ref: '#/definitions/notification_handler.GetUnreadCountResponse'
         "400":
           description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "403":
-          description: Forbidden
           schema:
             additionalProperties:
               type: string

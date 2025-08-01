@@ -597,7 +597,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notification/unread-count/{user_id}": {
+        "/notification/unread-count": {
             "get": {
                 "security": [
                     {
@@ -615,15 +615,6 @@ const docTemplate = `{
                     "notification"
                 ],
                 "summary": "Get unread notification count",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Unread notification count",
@@ -633,15 +624,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
