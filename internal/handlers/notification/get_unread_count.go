@@ -53,7 +53,7 @@ func (h *NotificationHandler) GetUnreadCount(w http.ResponseWriter, r *http.Requ
 			slog.Int64("request_user_id", userID),
 			slog.Int64("authenticated_user_id", claims.UserID),
 		)
-		utils.SendError(w, http.StatusForbidden, custom_errors.ErrInsufficientRights.Error())
+		utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *NotificationHandler) GetUnreadCount(w http.ResponseWriter, r *http.Requ
 				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 				return
 			case codes.PermissionDenied:
-				utils.SendError(w, http.StatusForbidden, custom_errors.ErrInsufficientRights.Error())
+				utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
 				return
 			case codes.Internal:
 				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
@@ -80,7 +80,7 @@ func (h *NotificationHandler) GetUnreadCount(w http.ResponseWriter, r *http.Requ
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
 			return
 		case errors.Is(err, custom_errors.ErrNotificationAccessDenied):
-			utils.SendError(w, http.StatusForbidden, custom_errors.ErrNotificationAccessDenied.Error())
+			utils.SendError(w, http.StatusForbidden, custom_errors.ErrForbidden.Error())
 			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
