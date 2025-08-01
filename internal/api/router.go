@@ -120,13 +120,12 @@ func (r *Router) setupPostRoutes(jwtMiddleware func(next http.Handler) http.Hand
 func (r *Router) setupRelationRoutes(jwtMiddleware func(next http.Handler) http.Handler) http.Handler {
 	relationHandler := relation_handler.NewRelationHandler(r.relationClient, r.log)
 	router := chi.NewRouter()
-
+	router.Get("/{user_id}/followees", relationHandler.GetFollowees)
+	router.Get("/{user_id}/followers", relationHandler.GetFollowers)
 	router.Group(func(r chi.Router) {
 		r.Use(jwtMiddleware)
 		r.Post("/follow", relationHandler.Follow)
 		r.Post("/unfollow", relationHandler.Unfollow)
-		r.Get("/{user_id}/followees", relationHandler.GetFollowees)
-		r.Get("/{user_id}/followers", relationHandler.GetFollowers)
 	})
 
 	return router
