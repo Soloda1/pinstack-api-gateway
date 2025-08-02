@@ -2707,6 +2707,12 @@
                         "type": "integer"
                     }
                 },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
                 "total": {
                     "type": "integer"
                 }
@@ -2720,6 +2726,12 @@
                     "items": {
                         "type": "integer"
                     }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
                 },
                 "total": {
                     "type": "integer"

@@ -401,6 +401,10 @@ definitions:
         items:
           type: integer
         type: array
+      limit:
+        type: integer
+      page:
+        type: integer
       total:
         type: integer
     type: object
@@ -410,6 +414,10 @@ definitions:
         items:
           type: integer
         type: array
+      limit:
+        type: integer
+      page:
+        type: integer
       total:
         type: integer
     type: object

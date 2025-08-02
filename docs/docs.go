@@ -2713,6 +2713,12 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
                 "total": {
                     "type": "integer"
                 }
@@ -2726,6 +2732,12 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
                 },
                 "total": {
                     "type": "integer"
