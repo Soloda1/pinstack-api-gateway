@@ -10,8 +10,6 @@ import (
 	"pinstack-api-gateway/internal/utils"
 
 	"github.com/go-playground/validator/v10"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type FollowRequest struct {
@@ -32,7 +30,9 @@ type FollowResponse struct {
 // @Param request body FollowRequest true "Follow request"
 // @Success 200 {object} FollowResponse "Followed successfully"
 // @Failure 400 {object} map[string]string "Bad request"
+// @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 404 {object} map[string]string "User not found"
+// @Failure 409 {object} map[string]string "Already following"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /relation/follow [post]
 func (h *RelationHandler) Follow(w http.ResponseWriter, r *http.Request) {
@@ -60,28 +60,24 @@ func (h *RelationHandler) Follow(w http.ResponseWriter, r *http.Request) {
 	err = h.relationClient.Follow(r.Context(), claims.UserID, req.FolloweeID)
 	if err != nil {
 		h.log.Error("follow failed", slog.String("error", err.Error()))
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.InvalidArgument:
-				utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
-				return
-			case codes.NotFound:
-				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-				return
-			}
-		}
+
 		switch {
+		case errors.Is(err, custom_errors.ErrValidationFailed):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+			return
+		case errors.Is(err, custom_errors.ErrSelfFollow):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrSelfFollow.Error())
+			return
+		case errors.Is(err, custom_errors.ErrAlreadyFollowing):
+			utils.SendError(w, http.StatusConflict, custom_errors.ErrAlreadyFollowing.Error())
+			return
 		case errors.Is(err, custom_errors.ErrUserNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-		case errors.Is(err, custom_errors.ErrFollowRelationExists), errors.Is(err, custom_errors.ErrAlreadyFollowing):
-			utils.SendError(w, http.StatusConflict, custom_errors.ErrAlreadyFollowing.Error())
+			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
 		}
-		return
 	}
 
 	response := FollowResponse{

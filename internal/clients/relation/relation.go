@@ -37,7 +37,17 @@ func (c *relationClient) Follow(ctx context.Context, followerID, followeeID int6
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
+				errMsg := st.Message()
+				if errMsg == custom_errors.ErrSelfFollow.Error() {
+					return custom_errors.ErrSelfFollow
+				}
 				return custom_errors.ErrValidationFailed
+			case codes.AlreadyExists:
+				return custom_errors.ErrAlreadyFollowing
+			case codes.NotFound:
+				return custom_errors.ErrUserNotFound
+			case codes.Internal:
+				return custom_errors.ErrExternalServiceError
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -58,7 +68,19 @@ func (c *relationClient) Unfollow(ctx context.Context, followerID, followeeID in
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
+				errMsg := st.Message()
+				if errMsg == custom_errors.ErrSelfUnfollow.Error() {
+					return custom_errors.ErrSelfUnfollow
+				}
 				return custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				errMsg := st.Message()
+				if errMsg == custom_errors.ErrFollowRelationNotFound.Error() {
+					return custom_errors.ErrFollowRelationNotFound
+				}
+				return custom_errors.ErrUserNotFound
+			case codes.Internal:
+				return custom_errors.ErrExternalServiceError
 			default:
 				return custom_errors.ErrExternalServiceError
 			}
@@ -81,6 +103,14 @@ func (c *relationClient) GetFollowers(ctx context.Context, followeeID int64, lim
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return nil, custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return nil, custom_errors.ErrUserNotFound
+			case codes.Internal:
+				errMsg := st.Message()
+				if errMsg == custom_errors.ErrDatabaseQuery.Error() {
+					return nil, custom_errors.ErrDatabaseQuery
+				}
+				return nil, custom_errors.ErrExternalServiceError
 			default:
 				return nil, custom_errors.ErrExternalServiceError
 			}
@@ -103,6 +133,14 @@ func (c *relationClient) GetFollowees(ctx context.Context, followerID int64, lim
 			switch st.Code() {
 			case codes.InvalidArgument:
 				return nil, custom_errors.ErrValidationFailed
+			case codes.NotFound:
+				return nil, custom_errors.ErrUserNotFound
+			case codes.Internal:
+				errMsg := st.Message()
+				if errMsg == custom_errors.ErrDatabaseQuery.Error() {
+					return nil, custom_errors.ErrDatabaseQuery
+				}
+				return nil, custom_errors.ErrExternalServiceError
 			default:
 				return nil, custom_errors.ErrExternalServiceError
 			}

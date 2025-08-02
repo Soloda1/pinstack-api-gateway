@@ -10,8 +10,6 @@ import (
 	"pinstack-api-gateway/internal/utils"
 
 	"github.com/go-playground/validator/v10"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type UnfollowRequest struct {
@@ -32,7 +30,8 @@ type UnfollowResponse struct {
 // @Param request body UnfollowRequest true "Unfollow request"
 // @Success 200 {object} UnfollowResponse "Unfollowed successfully"
 // @Failure 400 {object} map[string]string "Bad request"
-// @Failure 404 {object} map[string]string "User not found"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "User not found or relation not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /relation/unfollow [post]
 func (h *RelationHandler) Unfollow(w http.ResponseWriter, r *http.Request) {
@@ -60,28 +59,24 @@ func (h *RelationHandler) Unfollow(w http.ResponseWriter, r *http.Request) {
 	err = h.relationClient.Unfollow(r.Context(), claims.UserID, req.FolloweeID)
 	if err != nil {
 		h.log.Error("unfollow failed", slog.String("error", err.Error()))
-		if st, ok := status.FromError(err); ok {
-			switch st.Code() {
-			case codes.InvalidArgument:
-				utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
-				return
-			case codes.NotFound:
-				utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
-				return
-			case codes.Internal:
-				utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
-				return
-			}
-		}
+
 		switch {
-		case errors.Is(err, custom_errors.ErrUserNotFound):
-			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+		case errors.Is(err, custom_errors.ErrValidationFailed):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrValidationFailed.Error())
+			return
+		case errors.Is(err, custom_errors.ErrSelfUnfollow):
+			utils.SendError(w, http.StatusBadRequest, custom_errors.ErrSelfUnfollow.Error())
+			return
 		case errors.Is(err, custom_errors.ErrFollowRelationNotFound):
 			utils.SendError(w, http.StatusNotFound, custom_errors.ErrFollowRelationNotFound.Error())
+			return
+		case errors.Is(err, custom_errors.ErrUserNotFound):
+			utils.SendError(w, http.StatusNotFound, custom_errors.ErrUserNotFound.Error())
+			return
 		default:
 			utils.SendError(w, http.StatusInternalServerError, custom_errors.ErrExternalServiceError.Error())
+			return
 		}
-		return
 	}
 
 	response := UnfollowResponse{

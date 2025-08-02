@@ -847,6 +847,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -1351,6 +1357,36 @@ paths:
       summary: List posts with filters
       tags:
       - posts
+  /relation/{user_id}/followees:
+    get:
+      responses:
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+  /relation/{user_id}/followers:
+    get:
+      responses:
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
   /relation/follow:
     post:
       consumes:
@@ -1376,8 +1412,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
           description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Already following
           schema:
             additionalProperties:
               type: string
@@ -1418,8 +1466,14 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "404":
-          description: User not found
+          description: User not found or relation not found
           schema:
             additionalProperties:
               type: string
