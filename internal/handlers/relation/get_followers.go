@@ -14,6 +14,8 @@ import (
 type GetFollowersResponse struct {
 	FollowerIDs []int64 `json:"follower_ids"`
 	Total       int32   `json:"total"`
+	Page        int32   `json:"page"`
+	Limit       int32   `json:"limit"`
 }
 
 // GetFollowers godoc
@@ -86,6 +88,8 @@ func (h *RelationHandler) GetFollowers(w http.ResponseWriter, r *http.Request) {
 	response := GetFollowersResponse{
 		FollowerIDs: followerIDs,
 		Total:       int32(len(followerIDs)),
+		Page:        page,
+		Limit:       limit,
 	}
 	utils.Send(w, http.StatusOK, response)
 }
