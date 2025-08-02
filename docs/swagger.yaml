@@ -395,32 +395,6 @@ definitions:
       message:
         type: string
     type: object
-  relation_handler.GetFolloweesResponse:
-    properties:
-      followee_ids:
-        items:
-          type: integer
-        type: array
-      limit:
-        type: integer
-      page:
-        type: integer
-      total:
-        type: integer
-    type: object
-  relation_handler.GetFollowersResponse:
-    properties:
-      follower_ids:
-        items:
-          type: integer
-        type: array
-      limit:
-        type: integer
-      page:
-        type: integer
-      total:
-        type: integer
-    type: object
   relation_handler.UnfollowRequest:
     properties:
       followee_id:
@@ -1385,44 +1359,7 @@ paths:
       - posts
   /relation/{user_id}/followees:
     get:
-      consumes:
-      - application/json
-      description: Get list of users that the user is following
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
-      - default: 20
-        description: Limit for pagination
-        in: query
-        name: limit
-        type: integer
-      - default: 1
-        description: Page number
-        in: query
-        name: page
-        type: integer
-      produces:
-      - application/json
       responses:
-        "200":
-          description: Followees retrieved successfully
-          schema:
-            $ref: '#/definitions/relation_handler.GetFolloweesResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "404":
           description: User not found
           schema:
@@ -1435,49 +1372,9 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get user followees
-      tags:
-      - relation
   /relation/{user_id}/followers:
     get:
-      consumes:
-      - application/json
-      description: Get list of user followers by user ID
-      parameters:
-      - description: User ID
-        in: path
-        name: user_id
-        required: true
-        type: integer
-      - default: 20
-        description: Limit for pagination
-        in: query
-        name: limit
-        type: integer
-      - default: 1
-        description: Page number
-        in: query
-        name: page
-        type: integer
-      produces:
-      - application/json
       responses:
-        "200":
-          description: Followers retrieved successfully
-          schema:
-            $ref: '#/definitions/relation_handler.GetFollowersResponse'
-        "400":
-          description: Bad request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
         "404":
           description: User not found
           schema:
@@ -1490,9 +1387,6 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get user followers
-      tags:
-      - relation
   /relation/follow:
     post:
       consumes:

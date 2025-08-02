@@ -29,7 +29,7 @@ type GetFollowersResponse struct {
 // @Param page query int false "Page number" default(1)
 // @Success 200 {object} GetFollowersResponse "Followers retrieved successfully"
 // @Failure 400 {object} map[string]string "Bad request"
-// @Failure 401 {object} map[string]string "Unauthorized"
+
 // @Failure 404 {object} map[string]string "User not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /relation/{user_id}/followers [get]
