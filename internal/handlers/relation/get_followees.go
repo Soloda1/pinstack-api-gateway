@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"pinstack-api-gateway/internal/custom_errors"
+	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 
@@ -12,10 +13,10 @@ import (
 )
 
 type GetFolloweesResponse struct {
-	FolloweeIDs []int64 `json:"followee_ids"`
-	Total       int32   `json:"total"`
-	Page        int32   `json:"page"`
-	Limit       int32   `json:"limit"`
+	Followees []*models.RelationUser `json:"followees"`
+	Total     int64                  `json:"total"`
+	Page      int32                  `json:"page"`
+	Limit     int32                  `json:"limit"`
 }
 
 // GetFollowees godoc
@@ -64,7 +65,7 @@ func (h *RelationHandler) GetFollowees(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	followeeIDs, err := h.relationClient.GetFollowees(r.Context(), userID, limit, page)
+	followees, total, err := h.relationClient.GetFollowees(r.Context(), userID, limit, page)
 	if err != nil {
 		h.log.Error("Failed to get followees", slog.Int64("user_id", userID), slog.String("error", err.Error()))
 
@@ -85,10 +86,10 @@ func (h *RelationHandler) GetFollowees(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := GetFolloweesResponse{
-		FolloweeIDs: followeeIDs,
-		Total:       int32(len(followeeIDs)),
-		Page:        page,
-		Limit:       limit,
+		Followees: followees,
+		Total:     total,
+		Page:      page,
+		Limit:     limit,
 	}
 	utils.Send(w, http.StatusOK, response)
 }

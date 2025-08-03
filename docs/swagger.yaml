@@ -99,6 +99,15 @@ definitions:
       user_id:
         type: integer
     type: object
+  models.RelationUser:
+    properties:
+      avatar_url:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
   notification_handler.GetUnreadCountResponse:
     properties:
       count:
@@ -397,9 +406,9 @@ definitions:
     type: object
   relation_handler.GetFolloweesResponse:
     properties:
-      followee_ids:
+      followees:
         items:
-          type: integer
+          $ref: '#/definitions/models.RelationUser'
         type: array
       limit:
         type: integer
@@ -410,9 +419,9 @@ definitions:
     type: object
   relation_handler.GetFollowersResponse:
     properties:
-      follower_ids:
+      followers:
         items:
-          type: integer
+          $ref: '#/definitions/models.RelationUser'
         type: array
       limit:
         type: integer

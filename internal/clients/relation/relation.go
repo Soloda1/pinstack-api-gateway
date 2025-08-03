@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
+	"pinstack-api-gateway/internal/models"
 
 	pb "github.com/soloda1/pinstack-proto-definitions/gen/go/pinstack-proto-definitions/relation/v1"
 	"google.golang.org/grpc"
@@ -90,7 +91,7 @@ func (c *relationClient) Unfollow(ctx context.Context, followerID, followeeID in
 	return nil
 }
 
-func (c *relationClient) GetFollowers(ctx context.Context, followeeID int64, limit, page int32) ([]int64, error) {
+func (c *relationClient) GetFollowers(ctx context.Context, followeeID int64, limit, page int32) ([]*models.RelationUser, int64, error) {
 	c.log.Info("Getting followers", slog.Int64("followee_id", followeeID), slog.Int("limit", int(limit)), slog.Int("page", int(page)))
 	resp, err := c.client.GetFollowers(ctx, &pb.GetFollowersRequest{
 		FolloweeId: followeeID,
@@ -102,25 +103,31 @@ func (c *relationClient) GetFollowers(ctx context.Context, followeeID int64, lim
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
-				return nil, custom_errors.ErrValidationFailed
+				return nil, 0, custom_errors.ErrValidationFailed
 			case codes.NotFound:
-				return nil, custom_errors.ErrUserNotFound
+				return nil, 0, custom_errors.ErrUserNotFound
 			case codes.Internal:
 				errMsg := st.Message()
 				if errMsg == custom_errors.ErrDatabaseQuery.Error() {
-					return nil, custom_errors.ErrDatabaseQuery
+					return nil, 0, custom_errors.ErrDatabaseQuery
 				}
-				return nil, custom_errors.ErrExternalServiceError
+				return nil, 0, custom_errors.ErrExternalServiceError
 			default:
-				return nil, custom_errors.ErrExternalServiceError
+				return nil, 0, custom_errors.ErrExternalServiceError
 			}
 		}
-		return nil, custom_errors.ErrExternalServiceError
+		return nil, 0, custom_errors.ErrExternalServiceError
 	}
-	return resp.FollowerIds, nil
+
+	followers := make([]*models.RelationUser, len(resp.Followers))
+	for i, user := range resp.Followers {
+		followers[i] = models.RelationUserFromProto(user)
+	}
+
+	return followers, resp.Total, nil
 }
 
-func (c *relationClient) GetFollowees(ctx context.Context, followerID int64, limit, page int32) ([]int64, error) {
+func (c *relationClient) GetFollowees(ctx context.Context, followerID int64, limit, page int32) ([]*models.RelationUser, int64, error) {
 	c.log.Info("Getting followees", slog.Int64("follower_id", followerID), slog.Int("limit", int(limit)), slog.Int("page", int(page)))
 	resp, err := c.client.GetFollowees(ctx, &pb.GetFolloweesRequest{
 		FollowerId: followerID,
@@ -132,20 +139,26 @@ func (c *relationClient) GetFollowees(ctx context.Context, followerID int64, lim
 		if st, ok := status.FromError(err); ok {
 			switch st.Code() {
 			case codes.InvalidArgument:
-				return nil, custom_errors.ErrValidationFailed
+				return nil, 0, custom_errors.ErrValidationFailed
 			case codes.NotFound:
-				return nil, custom_errors.ErrUserNotFound
+				return nil, 0, custom_errors.ErrUserNotFound
 			case codes.Internal:
 				errMsg := st.Message()
 				if errMsg == custom_errors.ErrDatabaseQuery.Error() {
-					return nil, custom_errors.ErrDatabaseQuery
+					return nil, 0, custom_errors.ErrDatabaseQuery
 				}
-				return nil, custom_errors.ErrExternalServiceError
+				return nil, 0, custom_errors.ErrExternalServiceError
 			default:
-				return nil, custom_errors.ErrExternalServiceError
+				return nil, 0, custom_errors.ErrExternalServiceError
 			}
 		}
-		return nil, custom_errors.ErrExternalServiceError
+		return nil, 0, custom_errors.ErrExternalServiceError
 	}
-	return resp.FolloweeIds, nil
+
+	followees := make([]*models.RelationUser, len(resp.Followees))
+	for i, user := range resp.Followees {
+		followees[i] = models.RelationUserFromProto(user)
+	}
+
+	return followees, resp.Total, nil
 }
