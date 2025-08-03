@@ -7,7 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/prometheus/client_golang v1.22.0
-	github.com/soloda1/pinstack-proto-definitions v0.1.17
+	github.com/soloda1/pinstack-proto-definitions v0.1.19
 	github.com/spf13/viper v1.20.1
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.4

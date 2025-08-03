@@ -2235,6 +2235,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.RelationUser": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "notification_handler.GetUnreadCountResponse": {
             "type": "object",
             "properties": {
@@ -2689,10 +2703,10 @@ const docTemplate = `{
         "relation_handler.GetFolloweesResponse": {
             "type": "object",
             "properties": {
-                "followee_ids": {
+                "followees": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/models.RelationUser"
                     }
                 },
                 "limit": {
@@ -2709,10 +2723,10 @@ const docTemplate = `{
         "relation_handler.GetFollowersResponse": {
             "type": "object",
             "properties": {
-                "follower_ids": {
+                "followers": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/models.RelationUser"
                     }
                 },
                 "limit": {
