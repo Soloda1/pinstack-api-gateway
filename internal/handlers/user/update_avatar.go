@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/go-playground/validator/v10"
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"log/slog"
 	"net/http"
-	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/utils"
 )

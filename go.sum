@@ -86,8 +86,8 @@ github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjR
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/sagikazarmark/locafero v0.7.0 h1:5MqpDsTGNDhY8sGp0Aowyf0qKsPrhewaLSsFaodPcyo=
 github.com/sagikazarmark/locafero v0.7.0/go.mod h1:2za3Cg5rMaTMoG/2Ulr9AwtFaIppKXTRYnozin4aB5k=
-github.com/soloda1/pinstack-proto-definitions v0.1.19 h1:TRBG1HJcBvUqFy8u5OdF5z4ZX5YzxLDxhOKV+CFUoXs=
-github.com/soloda1/pinstack-proto-definitions v0.1.19/go.mod h1:Jl7Cv/0eQDLtxI5HdRANm6HYbSjX1x97Za4XRUySwrM=
+github.com/soloda1/pinstack-proto-definitions v0.1.20 h1:+O21egir/iLr8SfjBKBOv0KQoDVkM0dybP2b48X3aVE=
+github.com/soloda1/pinstack-proto-definitions v0.1.20/go.mod h1:Jl7Cv/0eQDLtxI5HdRANm6HYbSjX1x97Za4XRUySwrM=
 github.com/sourcegraph/conc v0.3.0 h1:OQTbbt6P72L20UqAkXXuLOj79LfEanQ+YQFNpLA9ySo=
 github.com/sourcegraph/conc v0.3.0/go.mod h1:Sdozi7LEKbFPqYX2/J+iBAM6HpqSLTASQIKqDmF7Mt0=
 github.com/spf13/afero v1.12.0 h1:UcOPyRBYczmFn6yvphxkn9ZEOY65cpwGKb5mL36mrqs=

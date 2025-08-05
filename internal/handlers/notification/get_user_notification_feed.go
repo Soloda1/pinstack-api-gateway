@@ -1,9 +1,9 @@
 package notification_handler
 
 import (
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"log/slog"
 	"net/http"
-	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/middlewares"
 	"pinstack-api-gateway/internal/models"
 	"pinstack-api-gateway/internal/utils"

@@ -2,8 +2,8 @@ package user_client
 
 import (
 	"context"
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"log/slog"
-	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
 

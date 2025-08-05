@@ -3,9 +3,10 @@ package auth_handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"log/slog"
 	"net/http"
-	"pinstack-api-gateway/internal/custom_errors"
+
 	"pinstack-api-gateway/internal/utils"
 
 	"google.golang.org/grpc/codes"

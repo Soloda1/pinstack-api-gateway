@@ -2,7 +2,7 @@ package auth_client
 
 import (
 	"context"
-	"pinstack-api-gateway/internal/custom_errors"
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"pinstack-api-gateway/internal/logger"
 	"pinstack-api-gateway/internal/models"
 
