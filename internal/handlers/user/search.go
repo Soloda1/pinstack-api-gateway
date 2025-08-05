@@ -2,8 +2,8 @@ package user_handler
 
 import (
 	"errors"
+	"github.com/soloda1/pinstack-proto-definitions/custom_errors"
 	"net/http"
-	"pinstack-api-gateway/internal/custom_errors"
 	"pinstack-api-gateway/internal/utils"
 	"strconv"
 )
