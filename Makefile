@@ -194,6 +194,31 @@ quick-test: start-gateway-infrastructure
 	go test -v -count=1 -timeout=10m ./internal/scenarios/integration/...
 	$(MAKE) stop-gateway-infrastructure
 
+# Очистка
+clean: clean-gateway-infrastructure
+	go clean
+	rm -f $(BINARY_NAME)
+	@echo "🧹 Финальная очистка Docker системы..."
+	docker system prune -a -f --volumes
+	@echo "✅ Вся очистка завершена"
+
+# Экстренная полная очистка Docker (если что-то пошло не так)
+clean-docker-force:
+	@echo "🚨 ЭКСТРЕННАЯ ПОЛНАЯ ОЧИСТКА DOCKER..."
+	@echo "⚠️  Это удалит ВСЕ Docker контейнеры, образы, volumes и сети!"
+	@read -p "Продолжить? (y/N): " confirm && [ "$$confirm" = "y" ] || exit 1
+	docker stop $$(docker ps -aq) 2>/dev/null || true
+	docker rm $$(docker ps -aq) 2>/dev/null || true
+	docker rmi $$(docker images -q) 2>/dev/null || true
+	docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	docker network rm $$(docker network ls -q) 2>/dev/null || true
+	docker system prune -a -f --volumes
+	@echo "💥 Экстренная очистка завершена"
+
+# CI локально (имитация GitHub Actions)
+ci-local: test-all
+	@echo "🎉 Локальный CI завершен успешно!"
+
 ######################
 # Monitoring Stack   #
 ######################
