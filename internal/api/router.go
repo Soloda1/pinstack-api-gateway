@@ -14,6 +14,7 @@ import (
 	relation_handler "pinstack-api-gateway/internal/handlers/relation"
 	user_handler "pinstack-api-gateway/internal/handlers/user"
 	"pinstack-api-gateway/internal/logger"
+	"pinstack-api-gateway/internal/metrics"
 	"pinstack-api-gateway/internal/middlewares"
 	"time"
 
@@ -30,9 +31,10 @@ type Router struct {
 	postClient         post_client.PostClient
 	relationClient     relation_client.RelationClient
 	notificationClient notification_client.NotificationClient
+	metricsProvider    metrics.MetricsProvider
 }
 
-func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient, notificationClient notification_client.NotificationClient) *Router {
+func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient auth_client.AuthClient, postClient post_client.PostClient, relationClient relation_client.RelationClient, notificationClient notification_client.NotificationClient, metricsProvider metrics.MetricsProvider) *Router {
 	return &Router{
 		router:             chi.NewRouter(),
 		log:                log,
@@ -41,6 +43,7 @@ func NewRouter(log *logger.Logger, userClient user_client.UserClient, authClient
 		postClient:         postClient,
 		relationClient:     relationClient,
 		notificationClient: notificationClient,
+		metricsProvider:    metricsProvider,
 	}
 }
 
@@ -49,6 +52,8 @@ func (r *Router) Setup(cfg *config.Config) {
 	r.router.Use(middleware.RealIP)
 	r.router.Use(middleware.Recoverer)
 	r.router.Use(middlewares.RequestLoggerMiddleware(r.log))
+	r.router.Use(middlewares.MetricsMiddleware(r.metricsProvider))
+	r.router.Use(middlewares.AuthMetricsMiddleware(r.metricsProvider))
 	r.router.Use(middleware.Timeout(time.Duration(cfg.HTTPServer.Timeout) * time.Second))
 
 	jwtMiddleware := middlewares.JWTValidationMiddleware(cfg.JWT.Secret, r.log)
