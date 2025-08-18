@@ -33,6 +33,7 @@ import (
 	relation_client "pinstack-api-gateway/internal/clients/relation"
 	user_client "pinstack-api-gateway/internal/clients/user"
 	"pinstack-api-gateway/internal/logger"
+	"pinstack-api-gateway/internal/metrics"
 	"time"
 )
 
@@ -46,6 +47,7 @@ type APIServer struct {
 	postClient         post_client.PostClient
 	relationClient     relation_client.RelationClient
 	notificationClient notification_client.NotificationClient
+	metricsProvider    metrics.MetricsProvider
 }
 
 func NewAPIServer(address string,
@@ -55,6 +57,7 @@ func NewAPIServer(address string,
 	postClient post_client.PostClient,
 	relationClient relation_client.RelationClient,
 	notificationClient notification_client.NotificationClient,
+	metricsProvider metrics.MetricsProvider,
 ) *APIServer {
 	return &APIServer{
 		address:            address,
@@ -64,11 +67,12 @@ func NewAPIServer(address string,
 		postClient:         postClient,
 		relationClient:     relationClient,
 		notificationClient: notificationClient,
+		metricsProvider:    metricsProvider,
 	}
 }
 
 func (s *APIServer) Run(cfg *config.Config) error {
-	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient, s.relationClient, s.notificationClient)
+	s.router = NewRouter(s.log, s.userClient, s.authClient, s.postClient, s.relationClient, s.notificationClient, s.metricsProvider)
 	s.router.Setup(cfg)
 
 	s.server = &http.Server{
