@@ -58,7 +58,7 @@ start-gateway-infrastructure: setup-system-tests
 	@docker network create pinstack 2>/dev/null || true
 	@docker network create pinstack-test 2>/dev/null || true
 	cd $(SYSTEM_TESTS_DIR) && \
-	docker compose -f docker-compose.test.yml up -d
+	API_GATEWAY_CONTEXT=../pinstack-api-gateway docker compose -f docker-compose.test.yml up -d
 	@echo "⏳ Ожидание готовности всех сервисов..."
 	@sleep 90
 
@@ -88,7 +88,7 @@ check-services:
 	@docker logs pinstack-redis-test --tail=5
 
 # Интеграционные тесты для всех endpoints API Gateway
-test-gateway-integration: start-gateway-infrastructure check-services
+test-gateway-integration: check-services
 	@echo "🧪 Запуск интеграционных тестов для API Gateway..."
 	cd $(SYSTEM_TESTS_DIR) && \
 	go test -v -count=1 -timeout=15m ./internal/scenarios/integration/...
@@ -114,7 +114,7 @@ clean-gateway-infrastructure:
 	@echo "✅ Полная очистка завершена"
 
 # Полные интеграционные тесты (с очисткой)
-test-integration: test-gateway-integration stop-gateway-infrastructure
+test-integration: start-gateway-infrastructure test-gateway-integration stop-gateway-infrastructure
 
 # Все тесты
 test-all: fmt lint test-unit test-integration

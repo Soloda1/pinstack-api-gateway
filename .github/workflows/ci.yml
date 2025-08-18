@@ -89,6 +89,8 @@ jobs:
 
     - name: Start Full Infrastructure for Integration Tests
       working-directory: pinstack-system-tests
+      env:
+        API_GATEWAY_CONTEXT: ../
       run: |
         # Запускаем все необходимые контейнеры для интеграционных тестов
         docker compose -f docker-compose.test.yml up -d
