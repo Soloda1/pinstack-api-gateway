@@ -11,13 +11,11 @@ import (
 func AuthMetricsMiddleware(metricsProvider metrics.MetricsProvider) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Get endpoint pattern from chi router context
 			endpoint := r.URL.Path
 			if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil && routeCtx.RoutePattern() != "" {
 				endpoint = routeCtx.RoutePattern()
 			}
 
-			// Check if Authorization header is present
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
 				metricsProvider.IncAuthorizationTotal(endpoint, "unauthorized")
@@ -25,7 +23,6 @@ func AuthMetricsMiddleware(metricsProvider metrics.MetricsProvider) func(next ht
 				return
 			}
 
-			// At this point, we know authorization was attempted
 			metricsProvider.IncAuthorizationTotal(endpoint, "authorized")
 			next.ServeHTTP(w, r)
 		})
