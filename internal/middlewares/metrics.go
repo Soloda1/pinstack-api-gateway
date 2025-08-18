@@ -22,8 +22,6 @@ func MetricsMiddleware(metricsProvider metrics.MetricsProvider) func(next http.H
 
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
-			metricsProvider.IncHTTPRequestsTotal(r.Method, endpoint, "processing")
-
 			next.ServeHTTP(ww, r)
 
 			duration := time.Since(start)
