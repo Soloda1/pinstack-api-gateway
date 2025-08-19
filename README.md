@@ -181,7 +181,7 @@ make clean
 
 **Базы данных и утилиты:**
 - 🐧 **PgAdmin**: http://localhost:5050 (admin@admin.com/admin)
-- 🔴 **Redis**: localhost:6379
+- 🔴 **Redis**:  http://localhost:6379
 - 🐛 **Kafka UI**: http://localhost:9091
 
 ### Особенности 🔧
